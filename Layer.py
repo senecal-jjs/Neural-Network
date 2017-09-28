@@ -14,23 +14,24 @@ class layer:
     # Calculate output for layer's neurons
     def calculate_output(self, prev_layer_outputs):
         for i in range(self.num_neurons):
-            self.outputs[i] = self.neuron.calculate_output(prev_layer_outputs, self.weights[i,:], self.last_layer)
+            self.outputs[i] = self.neuron.calculate_output(prev_layer_outputs, self.weights[i, :], self.last_layer)
 
     # Execute back_propagation step for the layer
-    def back_propagation(self, downstream_deltas, downstream_weights, upstream_layer_outputs):
+    def back_propagation(self, downstream_deltas, downstream_weights):
         # Update delta values
         for i in range(self.num_neurons):
             if len(downstream_deltas) == 1:
-                self.delta_values[i] = self.outputs[i] * (1 - self.outputs[i]) * np.dot(downstream_deltas,downstream_weights[0, i])
+                self.delta_values[i] = self.outputs[i] * (1 - self.outputs[i]) * np.dot(downstream_deltas,downstream_weights[:,i])
             else:
-                self.delta_values[i] = self.outputs[i]*(1-self.outputs[i])*np.dot(downstream_deltas, downstream_weights[:,i]) #could have less deltas than weights
+                self.delta_values[i] = self.outputs[i]*(1-self.outputs[i])*np.dot(downstream_deltas, downstream_weights[:,i])
 
+        return self.delta_values
+
+    def update_weights(self,upstream_layer_outputs):
         # Update weights
         for row in range(self.num_neurons):
             for col in range(len(upstream_layer_outputs)):
-                self.weights[row,col] = self.learning_rate*self.delta_values[row]*upstream_layer_outputs[col]
-
-        return self.delta_values
+                self.weights[row,col] += self.learning_rate*self.delta_values[row]*upstream_layer_outputs[col]
 
     def get_weight(self):
         return self.weights
@@ -43,3 +44,6 @@ class layer:
 
     def get_last_layer(self):
         return self.last_layer
+
+    def set_delta(self, in_delta):
+        self.delta_values = in_delta
