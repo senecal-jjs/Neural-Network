@@ -1,6 +1,6 @@
 from Layer import layer
 import random
-from typing import Sequence
+from typing import Sequence, List
 
 class Network(object):
 
@@ -30,3 +30,21 @@ class Network(object):
             self.layers.append(neurons_per_layer, neurons_per_layer, False)
         # get the output layer:
         self.layers.append(gen_layer(neurons_per_layer, num_outputs, True))
+
+    def _error_func(needed, actual):
+        return needed - actual
+
+    def _calc_batch_error(training_data : Sequence[trial_run], multiplier, error_func) -> (float, List):
+        """Calculates the delta-error for one training funciton.
+        The training data can be any size, and the multiplier is used
+        to either increase or decrease the magnitude of the error.
+        """
+        val_sum = 0
+        outputs = []
+        def calc_error(data_point):
+            out, layer_output = _calc_output(data_point.inputs)
+            outputs.append(layer_output)
+            return error_func(datapoint.solution, out)
+
+        sum_error = sum(map(calc_error, training_data))
+        return (multiplier * sum_error) / len(trainingData)
