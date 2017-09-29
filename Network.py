@@ -6,7 +6,7 @@ from typing import Sequence, List
 class Network(object):
 
     # kind of inefficent, but hey, why not
-    def _gen_weight_matrix(num_inputs, num_outputs, w_range):
+    def _gen_weight_matrix(self, num_inputs, num_outputs, w_range):
         return numpy.array( [[0 if start == end else random.uniform(-0.5,0.5) for start in range(0,num_inputs)] for end in range(0,num_outputs)], float)
 
 
@@ -21,7 +21,7 @@ class Network(object):
         # no idea what value this is supposed to be:
         learning_rate = .5
         def gen_layer(num_inputs, num_outputs, last_layer):
-            rweights = _get_weight_matrix(num_inputs, num_outputs, (-0.5,0.5))
+            rweights = self._gen_weight_matrix(num_inputs, num_outputs, (-0.5,0.5))
             return layer(last_layer,num_outputs, rweights,learning_rate)
 
         #first layer:
