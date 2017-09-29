@@ -27,11 +27,18 @@ class layer:
 
         return self.delta_values
 
-    def update_weights(self,upstream_layer_outputs):
+    def get_weight_change(self, upstream_layer_outputs):
+        # create a numpy matrix to hold the changes:
+        results = np.zeros(shape=(self.num_neurons, self.len(upstream_layer_outputs)))
         # Update weights
         for row in range(self.num_neurons):
             for col in range(len(upstream_layer_outputs)):
-                self.weights[row,col] += self.learning_rate*self.delta_values[row]*upstream_layer_outputs[col]
+                results[row][col] += self.learning_rate*self.delta_values[row]*upstream_layer_outputs[col]
+        return results
+
+    def update_weights(self,change_in_weights):
+        # Update weights
+        self.weights = np.add(self.weights, change_in_weights)
 
     def get_weight(self):
         return self.weights
