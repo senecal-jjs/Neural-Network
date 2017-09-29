@@ -1,9 +1,11 @@
 from Layer import layer
 import random
+import itertools
 from typing import Sequence, List
 
 class Network(object):
 
+    # kind of inefficent, but hey, why not
     def _gen_weight_matrix(num_inputs, num_outputs, w_range):
         return numpy.array( [[0 if start == end else random.uniform(-0.5,0.5) for start in range(0,num_inputs)] for end in range(0,num_outputs)], float)
 
@@ -31,20 +33,60 @@ class Network(object):
         # get the output layer:
         self.layers.append(gen_layer(neurons_per_layer, num_outputs, True))
 
+
+    def _calc_output(self, vector :numpy.ndarray) -> (float, List[numpy.ndarray]):
+        layer_outputs = []
+        layer_outputs.append(self.layers[0].calculate_output(vector))
+        for l in self.layers[1:]:
+            layer_outputs.append(l.calculate_output(layer_outputs[-1:]))
+        return layer_outputs[-1:], layer_outputs
+
+    def calc_output(self, vector :numpy.ndarray) -> float:
+        return self._calc_output(vector)[0]
+
     def _error_func(needed, actual):
-        return needed - actual
+        return needed - actual[0]
 
-    def _calc_batch_error(training_data : Sequence[trial_run], multiplier, error_func) -> (float, List):
-        """Calculates the delta-error for one training funciton.
-        The training data can be any size, and the multiplier is used
-        to either increase or decrease the magnitude of the error.
+            # performs backpropagation, once per call:
+    def _calc_weight_changes(self, data_point :trial_run, error_func=_error_func) -> List[numpy.ndarray]:
+        """ Performs backpropagation and gets how the weights should change
+        so the changes can be applied or averaged
         """
-        val_sum = 0
-        outputs = []
-        def calc_error(data_point):
-            out, layer_output = _calc_output(data_point.inputs)
-            outputs.append(layer_output)
-            return error_func(datapoint.solution, out)
+        out, layer_outputs = self._calc_output(data_point.inputs)
+        # need to go backward through the list, so create the list ahead of time
+        layer_deltas = [None for i in range(self.num_layers)]
 
-        sum_error = sum(map(calc_error, training_data))
-        return (multiplier * sum_error) / len(trainingData)
+        # calc the error of the output node, must be a numpy array:
+        layer_deltas[self.num_layers-1] = numpy.array([error_func(data_point.solution, out)])
+
+        #loop over list backwards and get the delta values:
+        for i, u in reversed(list(enumerate(layer_outputs[:-1]))):
+            layer_deltas[i] = u.backpropagation(layer_deltas[i+1],self.layers[i+1])
+
+        #we now have all the info to get the change in weight:
+        changew = []
+        # don't know what to do for the first one:
+        changew.append(elem.get_weight_change(data_point.inputs))
+        for i, elem in enumerate(layers[:1]):
+            changew.append(elem.get_weight_change(layer_outputs[i-1]))
+        return changew
+
+    def train_incremental(training_data : Sequence[trial_run]):
+        for elem in training_data:
+            self.train_batch([elem])
+
+    def train_batch(self, training_data : Sequence[trial_run]):
+        """Trains one batch of data
+        """
+        # place to keep changes in weights:
+        running_total = [numpy.zeros(l.weights.shape) for l in layers]
+        for data_point in training_data:
+            c = self._calc_weight_changes(data_point)
+            for i, change in zip(range(self.num_layers), c):
+                running_total[i] = numpy.sum(running_total[i],change)
+
+        # divide by the batch size:
+        av_change = map(lambda x: numpy.divide(x, self.num_layers), running_total)
+        # update the weights:
+        for i in range(self.num_layers):
+            self.layers[i].update_weights(av_change[i])
