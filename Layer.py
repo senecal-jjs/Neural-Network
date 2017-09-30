@@ -1,49 +1,55 @@
 import numpy as np
+import random
 import Neuron
 
+
 class layer:
-    def __init__(self, last_layer, num_neurons, weight_matrix, learning_rate):
-        self.last_layer = last_layer
-        self.num_neurons = num_neurons
-        self.weights = weight_matrix
-        self.outputs = np.zeros([num_neurons]) # 1 added for bias activation
-        self.delta_values = np.zeros([num_neurons])
-        self.learning_rate = learning_rate
-        self.neuron = Neuron.neuron()  # Used to calculate outputs
+    def __init__(self, weight_size, activation_function, input_layer = False, output_layer = False):
+        self.input_layer = input_layer
+        self.output_layer = output_layer
+        self.weight_size = weight_size  # (neurons in prev layer, neurons in next layer)
+
+        # Holds outputs and inputs for the layer
+        self.outputs = np.zeros(weight_size[0])
+        self.inputs = None
+
+        # Create neuron for output calculations
+        self.neuron = Neuron.neuron(activation_function, sigma=None)
+
+        # Create matrices to hold weights, deltas, and derivatives
+        self.weights = None
+        self.delta_values = None
+        self.derivatives = None
+
+        if not input_layer:
+            self.inputs = np.zeros(weight_size[0])
+            self.delta_values = np.zeros(weight_size[0])
+
+        if not output_layer:
+            self.weights = np.random.uniform(-0.2, 0.2, size=weight_size)  #np.ones(weight_size)*0.2
+            #print(self.weights)
+            #print()
+
+        if not output_layer and not input_layer:
+            self.derivatives=np.zeros(weight_size[0])
+
 
     # Calculate output for layer's neurons
-    def calculate_output(self, prev_layer_outputs):
-        for i in range(self.num_neurons):
-            self.outputs[i] = self.neuron.calculate_output(prev_layer_outputs, self.weights[i, :], self.last_layer)
+    def calculate_output(self):
+        if self.input_layer:
+            return self.outputs.dot(self.weights)
 
-    # Execute back_propagation step for the layer
-    def back_propagation(self, downstream_deltas, downstream_weights):
-        # Update delta values
-        for i in range(self.num_neurons):
-            if len(downstream_deltas) == 1:
-                self.delta_values[i] = self.outputs[i] * (1 - self.outputs[i]) * np.dot(downstream_deltas,downstream_weights[:,i])
-            else:
-                self.delta_values[i] = self.outputs[i]*(1-self.outputs[i])*np.dot(downstream_deltas, downstream_weights[:,i])
+        #print("unactivated input" + str(self.inputs))
+        self.outputs = self.neuron.calculate_output(self.inputs)
+        #print("activated outputs" + str(self.outputs))
+        if self.output_layer:
+            return self.outputs
+        else:
+            # For hidden layers add bias values, and calculate derivatives
+            self.outputs = np.append(self.outputs, 1) # add 1 for bias activation
+            self.derivatives = self.neuron.calculate_output(i_inputs=self.inputs, i_want_derivative=True)
 
-        return self.delta_values
-
-    def update_weights(self,upstream_layer_outputs):
-        # Update weights
-        for row in range(self.num_neurons):
-            for col in range(len(upstream_layer_outputs)):
-                self.weights[row,col] += self.learning_rate*self.delta_values[row]*upstream_layer_outputs[col]
-
-    def get_weight(self):
-        return self.weights
-
-    def get_outputs(self):
-        return self.outputs
-
-    def get_delta(self):
-        return self.delta_values
-
-    def get_last_layer(self):
-        return self.last_layer
+            return self.outputs.dot(self.weights)
 
     def set_delta(self, in_delta):
         self.delta_values = in_delta

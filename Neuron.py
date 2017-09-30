@@ -5,25 +5,26 @@ class neuron:
     def __init__(self, functionType, sigma = None):
         self.functionType = functionType
         self.sigma = sigma
-     
-    def calcOutput(inputs, weights, lastLayer):
-    	''' Given a vector of inputs and a vector of weights,
-			use the activation function to calculate the output '''
-		actFunc = ActivationFunction.activationFunction(inputs, weights, self.sigma)
 
-		output = 0
+    def calculate_output(self, i_inputs=None, i_want_derivative=False):
+        # Given a vector of inputs and a vector of weights
+        #  use the activation function to calculate the output '''
+        actFunc = ActivationFunction.activationFunction(inputs=i_inputs, want_derivative=i_want_derivative,
+                                                        sigma=self.sigma)
 
-		#Last layer is always linear weighted sum
-		if lastLayer:
-			output = actFunc.weightedSum()
+        output = 0
 
-		elif self.functionType == "sigmoid":
-			output = actFunc.sigmoid()
+        #Last layer is always linear weighted sum
+        if self.functionType == "linear":
+            output = actFunc.weightedSum()
 
-		elif self.functionType == "hyperbolic":
-			output = actFunc.hyperTan()
+        elif self.functionType == "sigmoid":
+            output = actFunc.sigmoid()
 
-		elif self.functionType == "gaussian":
-			output = actFunc.gaussian()
+        elif self.functionType == "hyperbolic":
+            output = actFunc.hyperTan()
 
-		return output
+        elif self.functionType == "gaussian":
+            output = actFunc.gaussian()
+
+        return output

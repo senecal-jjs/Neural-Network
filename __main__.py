@@ -1,7 +1,8 @@
 from tkinter import *
-import urllib3
 import buildGUI
-
+import numpy as np
+import random
+import MLP
 
 class buildNNMenu(Frame):
     def __init__(self, master = None):
@@ -35,6 +36,26 @@ class buildNNMenu(Frame):
 
 
 if __name__ == '__main__':
-    root = Tk()
-    app = buildNNMenu(root)
-    root.mainloop()
+    #root = Tk()
+    #app = buildNNMenu(root)
+    #root.mainloop()
+    net = MLP.network([1, 10, 10, 1], "sigmoid")
+
+    for k in range(0, 10):
+        data = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+        label = data * data
+        index = random.randint(0, 9)
+
+        for i in range(0, 100):
+            output = net.calculate_outputs(data[7])
+            net.backpropagate(output, label[7])
+            net.update_weights(0.1)
+
+    print(net.calculate_outputs(np.array([8])))
+    #print(net.calculate_outputs(np.array([3])))
+
+
+
+
+
+
