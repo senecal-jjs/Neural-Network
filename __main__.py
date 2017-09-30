@@ -39,20 +39,47 @@ if __name__ == '__main__':
     #root = Tk()
     #app = buildNNMenu(root)
     #root.mainloop()
-    net = MLP.network([1, 10, 10, 1], "sigmoid")
 
-    for k in range(0, 10):
-        data = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-        label = data * data
-        index = random.randint(0, 9)
+    # Network initialization: ([No. Inputs, Neurons per Layer...], "activation function")
+    net = MLP.network([2, 35, 35, 1], "sigmoid")
 
-        for i in range(0, 100):
-            output = net.calculate_outputs(data[7])
-            net.backpropagate(output, label[7])
-            net.update_weights(0.1)
 
-    print(net.calculate_outputs(np.array([8])))
-    #print(net.calculate_outputs(np.array([3])))
+    # Test routine
+
+    # Number of training examples
+    x=100
+
+    # Generate data and shuffle
+    data = np.zeros((x, 2))
+    data[:, 0] = np.linspace(1, 5, x)
+    data[:, 1] = np.linspace(1, 5, x)
+    np.random.shuffle(data)
+
+    # x^2 function
+    label = data[:, 0] * data[:, 1]
+
+    print("Inputs")
+    print(str(data[0, :]) + "\n")
+
+    print("True Value")
+    print(str(label[0]) + "\n")
+
+    print("Inputs")
+    print(str(data[1, :]) + "\n")
+
+    print("True Value")
+    print(str(label[1]) + "\n")
+
+    # Run 300 training iterations over the data
+    for k in range(0, 300):
+        for i in range(0, x):
+            output = net.calculate_outputs(data[i, :])
+            net.backpropagate(output, label[i])
+            net.update_weights(0.01)
+
+    print("Network Outputs")
+    print(net.calculate_outputs(data[0, :]))
+    print(net.calculate_outputs(data[1, :]))
 
 
 
