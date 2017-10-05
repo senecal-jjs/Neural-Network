@@ -1,6 +1,7 @@
 import numpy as np
 import Layer
-from types import Sequence
+from typing import Sequence
+from trainingArray import trial_run
 
 class network:
     # include number of inputs as the first value in neurons_per_layer
@@ -60,7 +61,7 @@ class network:
         """Trains one batch of data
         """
         # place to keep changes in weights:
-        running_total = [numpy.zeros(l.weights.shape) for l in layers]
+        running_total = [np.zeros(l.weights.shape) for l in self.layers[:-1]]
         for data_point in training_data:
             output = self.calculate_outputs(data_point.inputs)
             # internally calculate the delta values:
@@ -69,11 +70,14 @@ class network:
             change = self.calc_update_weights(learning_rate)
             # sum the changes:
             for i in range(len(change)):
-                running_total[i] = numpy.sum(running_total[i], change[i]);
+                running_total[i] = running_total[i] + change[i]
 
-        assert len(change) == self.num_layers
+        assert len(change) == self.num_layers-1
         # divide by the batch size:
-        av_change = map(lambda x: numpy.divide(x, self.num_layers), running_total)
+        av_change = list(map(lambda x: np.divide(x, self.num_layers), running_total))
         # update the weights:
-        for i in range(self.num_layers):
-            self.layers[i].update_weights(av_change[i])
+        self.update_weights(av_change)
+
+    def train_incremental(self, training_data : Sequence[trial_run], learning_rate):
+        for d in training_data:
+            self.train_batch([d],learning_rate)
