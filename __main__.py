@@ -75,7 +75,8 @@ if __name__ == '__main__':
         for i in range(0, x):
             output = net.calculate_outputs(data[i, :])
             net.backpropagate(output, label[i])
-            net.update_weights(0.01)
+            weight_changes = net.calc_update_weights(0.01)
+            net.update_weights(weight_changes)
 
     print("Network Outputs")
     print(net.calculate_outputs(data[0, :]))
