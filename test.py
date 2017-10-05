@@ -3,6 +3,7 @@
 import numpy as np
 import random
 import MLP
+import math
 from trainingArray import trial_run
 
 def gen_test_set(size, func):
@@ -19,15 +20,23 @@ if __name__ == '__main__':
     func = lambda inp: inp**2
 
     net = MLP.network([1, 35, 35, 1], "sigmoid")
+    print("Training Network:")
     for i in range(x):
         data = gen_test_set(30,func)
-        net.train_batch(data, 0.0005)
+        # net.train_batch(data, 0.0005)
+        net.train_stochastic(data, 10, 3, 0.005)
 
-
+    print("Testing Network:")
+    set_size = 500
     # test how "good" it is:
-    data = gen_test_set(30,func)
+    data = gen_test_set(set_size,func)
+    sum_err = 0
 
     for i in data:
         output = net.calculate_outputs(i.inputs)
-        err = output - i.solution;
-        print("Error was: %f" % err)
+        # does root-mean squared error:
+        err = output - i.solution
+        # print("Error was: %f" % err)
+        sum_err = sum_err + err**2
+
+    print("RMSE: %f" % math.sqrt(sum_err/set_size))
