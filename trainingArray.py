@@ -1,5 +1,5 @@
 import random
-import collections import namedtuple
+from collections import namedtuple
 
 trial_run = namedtuple('trial_run', ['inputs','solution'])
 
