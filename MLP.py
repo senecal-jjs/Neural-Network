@@ -79,5 +79,17 @@ class network:
         self.update_weights(av_change)
 
     def train_incremental(self, training_data : Sequence[trial_run], learning_rate):
+        """Applies all the elements on at a time to the data set, and updates
+        the weights after every data point
+        """
         for d in training_data:
             self.train_batch([d],learning_rate)
+
+    def train_stochastic(self, training_data : Sequence[trial_run], batch_size, num_batches, learning_rate):
+        """Trains a series of random batches from training_data of size batch_size.
+        Repeats num_batches times.
+        """
+        for i in range(num_batches):
+            t_set_indecies = np.random.choice(range(len(training_data)),batch_size,replace=False)
+            t_set = [training_data[i] for i in t_set_indecies]
+            self.train_batch(t_set, learning_rate)
