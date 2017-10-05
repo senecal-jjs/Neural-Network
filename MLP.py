@@ -39,10 +39,17 @@ class network:
             self.layers[i].delta_values = w_mod.dot(self.layers[i + 1].delta_values) * \
                                                     self.layers[i].derivatives
 
-    def update_weights(self, learning_rate):
+    def calc_update_weights(self, learning_rate):
+        weight_changes = []
         for i in range(self.num_layers-1):
             weight_change = -learning_rate * np.outer(self.layers[i+1].delta_values, self.layers[i].outputs).T
             #print()
             #print("weight change")
             #print(weight_change)
-            self.layers[i].weights += weight_change
+            weight_changes.append(weight_change);
+        return weight_changes
+
+
+    def update_weights(self, weight_changes):
+        for i in range(self.num_layers-1):
+            self.layers[i].weights += weight_changes[i]
