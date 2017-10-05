@@ -32,7 +32,7 @@ class buildNNMenu(Frame):
         root.mainloop()
         exit()
 
-        
+
 
 
 if __name__ == '__main__':
@@ -47,7 +47,7 @@ if __name__ == '__main__':
     # Test routine
 
     # Number of training examples
-    x=100
+    x=200
 
     # Generate data and shuffle
     data = np.zeros((x, 2))
@@ -81,9 +81,3 @@ if __name__ == '__main__':
     print("Network Outputs")
     print(net.calculate_outputs(data[0, :]))
     print(net.calculate_outputs(data[1, :]))
-
-
-
-
-
-

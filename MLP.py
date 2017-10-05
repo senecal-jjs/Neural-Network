@@ -1,5 +1,6 @@
 import numpy as np
 import Layer
+from types import Sequence
 
 class network:
     # include number of inputs as the first value in neurons_per_layer
@@ -53,3 +54,26 @@ class network:
     def update_weights(self, weight_changes):
         for i in range(self.num_layers-1):
             self.layers[i].weights += weight_changes[i]
+
+
+    def train_batch(self, training_data : Sequence[trial_run], learning_rate):
+        """Trains one batch of data
+        """
+        # place to keep changes in weights:
+        running_total = [numpy.zeros(l.weights.shape) for l in layers]
+        for data_point in training_data:
+            output = self.calculate_outputs(data_point.inputs)
+            # internally calculate the delta values:
+            self.backpropagate(output, data_point.solution)
+            # get the change in weight from those delta values:
+            change = self.calc_update_weights(learning_rate)
+            # sum the changes:
+            for i in range(len(change)):
+                running_total[i] = numpy.sum(running_total[i], change[i]);
+
+        assert len(change) == self.num_layers
+        # divide by the batch size:
+        av_change = map(lambda x: numpy.divide(x, self.num_layers), running_total)
+        # update the weights:
+        for i in range(self.num_layers):
+            self.layers[i].update_weights(av_change[i])
