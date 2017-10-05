@@ -1,5 +1,7 @@
 import numpy as np
 import Layer
+from typing import Sequence
+from trainingArray import trial_run
 
 class network:
     # include number of inputs as the first value in neurons_per_layer
@@ -39,10 +41,55 @@ class network:
             self.layers[i].delta_values = w_mod.dot(self.layers[i + 1].delta_values) * \
                                                     self.layers[i].derivatives
 
-    def update_weights(self, learning_rate):
+    def calc_update_weights(self, learning_rate):
+        weight_changes = []
         for i in range(self.num_layers-1):
             weight_change = -learning_rate * np.outer(self.layers[i+1].delta_values, self.layers[i].outputs).T
             #print()
             #print("weight change")
             #print(weight_change)
-            self.layers[i].weights += weight_change
+            weight_changes.append(weight_change);
+        return weight_changes
+
+
+    def update_weights(self, weight_changes):
+        for i in range(self.num_layers-1):
+            self.layers[i].weights += weight_changes[i]
+
+
+    def train_batch(self, training_data : Sequence[trial_run], learning_rate):
+        """Trains one batch of data
+        """
+        # place to keep changes in weights:
+        running_total = [np.zeros(l.weights.shape) for l in self.layers[:-1]]
+        for data_point in training_data:
+            output = self.calculate_outputs(data_point.inputs)
+            # internally calculate the delta values:
+            self.backpropagate(output, data_point.solution)
+            # get the change in weight from those delta values:
+            change = self.calc_update_weights(learning_rate)
+            # sum the changes:
+            for i in range(len(change)):
+                running_total[i] = running_total[i] + change[i]
+
+        assert len(change) == self.num_layers-1
+        # divide by the batch size:
+        av_change = list(map(lambda x: np.divide(x, self.num_layers), running_total))
+        # update the weights:
+        self.update_weights(av_change)
+
+    def train_incremental(self, training_data : Sequence[trial_run], learning_rate):
+        """Applies all the elements on at a time to the data set, and updates
+        the weights after every data point
+        """
+        for d in training_data:
+            self.train_batch([d],learning_rate)
+
+    def train_stochastic(self, training_data : Sequence[trial_run], batch_size, num_batches, learning_rate):
+        """Trains a series of random batches from training_data of size batch_size.
+        Repeats num_batches times.
+        """
+        for i in range(num_batches):
+            t_set_indecies = np.random.choice(range(len(training_data)),batch_size,replace=False)
+            t_set = [training_data[i] for i in t_set_indecies]
+            self.train_batch(t_set, learning_rate)

@@ -32,7 +32,7 @@ class buildNNMenu(Frame):
         root.mainloop()
         exit()
 
-        
+
 
 
 if __name__ == '__main__':
@@ -47,7 +47,7 @@ if __name__ == '__main__':
     # Test routine
 
     # Number of training examples
-    x=100
+    x=200
 
     # Generate data and shuffle
     data = np.zeros((x, 2))
@@ -75,14 +75,9 @@ if __name__ == '__main__':
         for i in range(0, x):
             output = net.calculate_outputs(data[i, :])
             net.backpropagate(output, label[i])
-            net.update_weights(0.01)
+            weight_changes = net.calc_update_weights(0.01)
+            net.update_weights(weight_changes)
 
     print("Network Outputs")
     print(net.calculate_outputs(data[0, :]))
     print(net.calculate_outputs(data[1, :]))
-
-
-
-
-
-

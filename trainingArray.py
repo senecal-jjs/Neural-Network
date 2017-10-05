@@ -1,4 +1,7 @@
 import random
+from collections import namedtuple
+
+trial_run = namedtuple('trial_run', ['inputs','solution'])
 
 class trainingArray:
     def __init__(self, n, examples):
@@ -27,7 +30,7 @@ class trainingArray:
                 functionInputs.append(random.uniform(-10, 10)) #update this based on bounds of function
 
         solution = self.solveRosenbrock(functionInputs)
-        return (functionInputs, solution)
+        return trial_run(functionInputs, solution)
 
     def solveRosenbrock(self, inputs):
         ''' Given an array of inputs, return the solution to the
