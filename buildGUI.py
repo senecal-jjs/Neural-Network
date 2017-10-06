@@ -145,6 +145,17 @@ class buildGUI(Frame):
         exit()
 
     def run_mlp(self):
+        print("Starting MPL\n------------------------------------------------")
+        # Print out what was just done:
+        print("Number of inputs: %s" % self.inputs.get())
+        print("Number of outputs: %s" % self.outputs.get())
+        print("Number of examples: %s" % self.examples.get())
+        print("Hidden Layers: %s" % self.hiddenLayers.get())
+        print("Nodes per hidden layer: %s" % self.nodes.get())
+        print("Activation function: %s" % self.actFunc.get())
+        print("Update method: %s" % self.update_method.get())
+        print("Learning rate: %s" % self.learningRate.get())
+        print("Training iterations: %s\n" % self.iterations.get())
 
         #Set the number of nodes per layer as input for the MLP net
         net_layers = self.get_mlp_layers();
@@ -208,7 +219,7 @@ class buildGUI(Frame):
             output_vals.append(out_val)
 
         error = self.rmse(output_vals, true_vals)
-        print ("RMSE: " + str(error))
+        print ("RMSE: %f\n" % error)
 
         if self.write_output == 1:
             self.create_csv(inputs, output_vals);
