@@ -1,5 +1,4 @@
 from tkinter import *
-import urllib3
 import buildGUI
 
 
@@ -30,8 +29,6 @@ class buildNNMenu(Frame):
         app = buildGUI.buildGUI(value, root)
         root.mainloop()
         exit()
-
-        
 
 
 if __name__ == '__main__':
