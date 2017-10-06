@@ -30,18 +30,11 @@ class network:
 
         return self.layers[-1].calculate_output()
 
-    # Backpropgate through the network
+    # Backpropgate on the last layer in the RBF network
     def backpropagate(self, network_output, true_value):
         # Output layer delta
         self.layers[-1].delta_values = (network_output - true_value)
 
-        # Hidden layer delta
-        for i in reversed(range(1, self.num_layers - 1)):
-            # No deltas for the bias values
-            w_mod = self.layers[i].weights[0:-1, :]
-            self.layers[i].delta_values = w_mod.dot(self.layers[i + 1].delta_values) * self.layers[i].derivatives
-
     def update_weights(self, learning_rate):
-        for i in range(self.num_layers-1):
-            weight_change = -learning_rate * np.outer(self.layers[i+1].delta_values, self.layers[i].outputs).T
-            self.layers[i].weights += weight_change
+        weight_change = -learning_rate * np.outer(self.layers[2].delta_values, self.layers[1].outputs).T
+        self.layers[1].weights += weight_change

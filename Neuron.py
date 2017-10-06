@@ -1,30 +1,31 @@
-import ActivationFunction
 import numpy as np
 
+
 class neuron:
-    def __init__(self, functionType, sigma = None):
-        self.functionType = functionType
+    def __init__(self, function_type, sigma=None):
+        self.function_type = function_type
         self.sigma = sigma
 
     def calculate_output(self, i_inputs=None, i_want_derivative=False, in_Kvectors=None):
-        # Given a vector of inputs and a vector of weights
-        #  use the activation function to calculate the output '''
-        actFunc = ActivationFunction.activationFunction(inputs=i_inputs, want_derivative=i_want_derivative,
-                                                        sigma=self.sigma, k_vectors=in_Kvectors)
+        # Given a vector of inputs and an array of weights
+        # use the activation function to calculate the output '''
 
         output = 0
 
-        #Last layer is always linear weighted sum
-        if self.functionType == "linear":
-            output = actFunc.weightedSum()
+        if self.function_type == "linear":
+            output = i_inputs
 
-        elif self.functionType == "sigmoid":
-            output = actFunc.sigmoid()
+        elif self.function_type == "sigmoid":
+            if i_want_derivative:
+                logit = 1 / (1 + np.exp(-i_inputs))
+                output = logit * (1 - logit)
+            else:
+                output = 1 / (1 + np.exp(-i_inputs))
 
-        elif self.functionType == "hyperbolic":
-            output = actFunc.hyperTan()
+        elif self.function_type == "hyperbolic":
+            output = np.tanh(i_inputs)
 
-        elif self.functionType == "gaussian":
-            output = actFunc.gaussian()
+        elif self.function_type == "gaussian":
+            output = np.exp(-((np.linalg.norm(np.subtract(i_inputs, in_Kvectors)) ** 2) / (2 * (self.sigma ** 2))))
 
         return output

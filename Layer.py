@@ -3,17 +3,17 @@ import Neuron
 
 
 class layer:
-    def __init__(self, weight_size, activation_function, input_layer = False, output_layer = False):
+    def __init__(self, weight_size, activation_function, input_layer = False, output_layer = False, in_sigma=None):
         self.input_layer = input_layer
         self.output_layer = output_layer
         self.weight_size = weight_size  # (neurons in prev layer, neurons in next layer)
 
-        # Holds outputs and inputs for the layer
+        # Holds output and input vector for the layer
         self.outputs = np.zeros(weight_size[0])
         self.inputs = None
 
         # Create neuron for output calculations
-        self.neuron = Neuron.neuron(activation_function, sigma=None)
+        self.neuron = Neuron.neuron(activation_function, sigma=in_sigma)
 
         # Create matrices to hold weights, deltas, and derivatives
         self.weights = None
@@ -36,6 +36,7 @@ class layer:
         if self.input_layer:
             return self.outputs.dot(self.weights)
 
+        # Run inputs through the activation function
         self.outputs = self.neuron.calculate_output(i_inputs=self.inputs, in_Kvectors=None)
         if self.output_layer:
             return self.outputs
