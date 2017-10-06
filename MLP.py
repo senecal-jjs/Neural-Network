@@ -1,5 +1,6 @@
 import numpy as np
 import Layer
+import math
 from typing import Sequence
 from trainingArray import trial_run
 
@@ -57,7 +58,7 @@ class network:
             self.layers[i].weights += weight_changes[i]
 
 
-    def train_until_convergence(self, training_data : Sequence[trial_run], testing_data : Sequence[trial_run]
+    def train_until_convergence(self, training_data : Sequence[trial_run], testing_data : Sequence[trial_run],
                                 train_func, threshold, learning_rate,
                                 stop_iter=10000):
         """Uses the root mean squared error calculate the error of the function. When the error
@@ -67,23 +68,21 @@ class network:
         iter_num = 0
         # some value greater than the threshold (I hope:):
         error = 10000
-        while((iter_num == 0 or error < threshold) && iter_num >= stop_iter):
+        while((iter_num == 0 or error > threshold) and iter_num <= stop_iter):
             train_func(training_data, learning_rate)
             sum_err = 0
             for i in testing_data:
-                output = net.calculate_outputs(i.inputs)
+                output = self.calculate_outputs(i.inputs)
                 # does root-mean squared error:
                 e = output - i.solution
-                # print("Error was: %f" % e)
                 sum_err = sum_err + e**2
-            error = math.sqrt(sum_err/len(data))
+            error = math.sqrt(sum_err/len(testing_data))
             iter_num = iter_num + 1
         # Tell the caller about why we stopped:
-        if error < threshold:
+        if error <= threshold:
             return True
         else:
             return False
-
 
 
     def train_batch(self, training_data : Sequence[trial_run], learning_rate):

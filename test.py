@@ -19,24 +19,36 @@ if __name__ == '__main__':
     x = 3000
     func = lambda inp: inp**2
 
+    test_size = 1000
+    train_size = 500
+
     net = MLP.network([1, 35, 35, 1], "sigmoid")
+
+
+    test_set = gen_test_set(test_size,func)
+    training_set = gen_test_set(train_size,func)
+
+    def stochastic_auto(batch_size, num_batches):
+        def run(training_data, learning_rate):
+            net.train_stochastic(training_data, batch_size, num_batches, learning_rate)
+        return run
+
     print("Training Network:")
-    for i in range(x):
-        data = gen_test_set(30,func)
-        # net.train_batch(data, 0.0005)
-        net.train_stochastic(data, 10, 3, 0.005)
+    result = net.train_until_convergence(training_set, test_set, stochastic_auto(100,4), .3, .001, 5000)
+    if result:
+        print("Convergence during training occured")
+    else:
+        print("No convergence while training")
 
     print("Testing Network:")
-    set_size = 500
     # test how "good" it is:
-    data = gen_test_set(set_size,func)
     sum_err = 0
 
-    for i in data:
+    for i in test_set:
         output = net.calculate_outputs(i.inputs)
         # does root-mean squared error:
         err = output - i.solution
         # print("Error was: %f" % err)
         sum_err = sum_err + err**2
 
-    print("RMSE: %f" % math.sqrt(sum_err/set_size))
+    print("RMSE: %f" % math.sqrt(sum_err/test_size))
