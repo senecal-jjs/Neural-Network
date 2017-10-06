@@ -27,8 +27,6 @@ class network:
         self.layers[0].outputs = np.append(inputs, 1)  # the 1 is added as a bias value
 
         for i in range(self.num_layers - 1):
-            #print("input" + str(i))
-            #print(self.layers[i].inputs)
             self.layers[i+1].inputs = self.layers[i].calculate_output()
 
         return self.layers[-1].calculate_output()
@@ -39,16 +37,12 @@ class network:
         for i in reversed(range(1, self.num_layers - 1)):
             # No deltas for the bias values
             w_mod = self.layers[i].weights[0:-1,:]
-            self.layers[i].delta_values = w_mod.dot(self.layers[i + 1].delta_values) * \
-                                                    self.layers[i].derivatives
+            self.layers[i].delta_values = w_mod.dot(self.layers[i + 1].delta_values) * self.layers[i].derivatives
 
     def calc_update_weights(self, learning_rate):
         weight_changes = []
         for i in range(self.num_layers-1):
             weight_change = -learning_rate * np.outer(self.layers[i+1].delta_values, self.layers[i].outputs).T
-            #print()
-            #print("weight change")
-            #print(weight_change)
             weight_changes.append(weight_change);
         return weight_changes
 

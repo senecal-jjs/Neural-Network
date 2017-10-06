@@ -26,7 +26,7 @@ class network:
         self.layers[0].outputs = np.append(inputs, 1)  # the 1 is added as a bias value
 
         for i in range(self.num_layers - 1):
-            self.layers[i+1].inputs = self.layers[i].calculate_output(in_k_means_vectors=k_means_vectors)
+            self.layers[i+1].inputs = self.layers[i].calculate_output(in_Kvectors=k_means_vectors)
 
         return self.layers[-1].calculate_output()
 

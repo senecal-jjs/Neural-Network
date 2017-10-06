@@ -6,11 +6,11 @@ class neuron:
         self.functionType = functionType
         self.sigma = sigma
 
-    def calculate_output(self, i_inputs=None, i_want_derivative=False):
+    def calculate_output(self, i_inputs=None, i_want_derivative=False, in_Kvectors=None):
         # Given a vector of inputs and a vector of weights
         #  use the activation function to calculate the output '''
         actFunc = ActivationFunction.activationFunction(inputs=i_inputs, want_derivative=i_want_derivative,
-                                                        sigma=self.sigma)
+                                                        sigma=self.sigma, k_vectors=in_Kvectors)
 
         output = 0
 

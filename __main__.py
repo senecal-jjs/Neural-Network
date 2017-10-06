@@ -1,7 +1,6 @@
 from tkinter import *
 import buildGUI
 import numpy as np
-import random
 import MLP
 
 class buildNNMenu(Frame):

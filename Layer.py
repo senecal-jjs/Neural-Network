@@ -25,9 +25,7 @@ class layer:
             self.delta_values = np.zeros(weight_size[0])
 
         if not output_layer:
-            self.weights = np.random.uniform(-0.2, 0.2, size=weight_size)  #np.ones(weight_size)*0.2
-            #print(self.weights)
-            #print()
+            self.weights = np.random.uniform(-0.2, 0.2, size=weight_size)
 
         if not output_layer and not input_layer:
             self.derivatives=np.zeros(weight_size[0])
@@ -38,9 +36,7 @@ class layer:
         if self.input_layer:
             return self.outputs.dot(self.weights)
 
-        #print("unactivated input" + str(self.inputs))
-        self.outputs = self.neuron.calculate_output(self.inputs)
-        #print("activated outputs" + str(self.outputs))
+        self.outputs = self.neuron.calculate_output(i_inputs=self.inputs, in_Kvectors=None)
         if self.output_layer:
             return self.outputs
         else:
