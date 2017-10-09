@@ -1,6 +1,7 @@
 from tkinter import *
 import buildGUI
 import numpy as np
+import random
 import MLP
 
 class buildNNMenu(Frame):
@@ -31,22 +32,22 @@ class buildNNMenu(Frame):
         root.mainloop()
         exit()
 
-
+        
 
 
 if __name__ == '__main__':
-    #root = Tk()
-    #app = buildNNMenu(root)
-    #root.mainloop()
+    root = Tk()
+    app = buildNNMenu(root)
+    root.mainloop()
 
     # Network initialization: ([No. Inputs, Neurons per Layer...], "activation function")
-    net = MLP.network([2, 35, 35, 1], "sigmoid")
+    '''net = MLP.network([2, 35, 35, 1], "sigmoid")
 
 
     # Test routine
 
     # Number of training examples
-    x=200
+    x=100
 
     # Generate data and shuffle
     data = np.zeros((x, 2))
@@ -74,9 +75,14 @@ if __name__ == '__main__':
         for i in range(0, x):
             output = net.calculate_outputs(data[i, :])
             net.backpropagate(output, label[i])
-            weight_changes = net.calc_update_weights(0.01)
-            net.update_weights(weight_changes)
+            net.update_weights(0.01)
 
     print("Network Outputs")
     print(net.calculate_outputs(data[0, :]))
-    print(net.calculate_outputs(data[1, :]))
+    print(net.calculate_outputs(data[1, :]))'''
+
+
+
+
+
+
