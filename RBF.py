@@ -9,11 +9,12 @@ class network:
     def __init__(self, neurons_per_layer, activation_function, k_means_vectors):
         self.layers = []
         self.num_layers = len(neurons_per_layer)
+        self.sigma = self.calculate_sigma(k_means_vectors)
 
         # Create the three layers of the network, input, hidden, output
         self.layers.append(Layer.layer([neurons_per_layer[0] + 1, neurons_per_layer[0 + 1]], "linear", input_layer=True))
         self.layers.append(Layer.layer([neurons_per_layer[1] + 1, neurons_per_layer[1 + 1]], activation_function,
-                                       in_sigma=0.1, k_means=k_means_vectors))
+                                       in_sigma=self.sigma, k_means=k_means_vectors))
         self.layers.append(Layer.layer([neurons_per_layer[-1], None], "linear", output_layer=True))
 
     # inputs is a one dimensional array containing the inputs to the function
@@ -36,3 +37,15 @@ class network:
             self.backpropagate(output, data_point.solution)
             self.update_weights(learning_rate)
         print('test')
+
+    @staticmethod
+    def calculate_sigma(k_means_vectors):
+        max_distance = 0
+        for vector_1 in k_means_vectors:
+            for vector_2 in k_means_vectors:
+                distance = np.linalg.norm(np.subtract(vector_1, vector_2))
+                if distance > max_distance:
+                    max_distance = distance
+
+        sigma = max_distance/np.sqrt(2*len(k_means_vectors))
+        return sigma

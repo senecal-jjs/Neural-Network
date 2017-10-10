@@ -157,7 +157,7 @@ class buildGUI(Frame):
         print("Learning rate: %s" % self.learningRate.get())
         print("Training iterations: %s\n" % self.iterations.get())
 
-        #Set the number of nodes per layer as input for the MLP net
+        # Set the number of nodes per layer as input for the MLP net
         net_layers = self.get_mlp_layers();
         net = MLP.network(net_layers, self.actFunc.get())
         net = self.train_mlp(net)
