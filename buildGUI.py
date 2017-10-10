@@ -3,6 +3,8 @@ import urllib3
 import trainingArray
 import MLP
 import numpy as np
+import Kmeans
+import RBF
 
 
 class buildGUI(Frame):
@@ -118,9 +120,16 @@ class buildGUI(Frame):
             self.sigma.grid(row=5, column=1)
 
             #Check box for whether or not to use K means clustering
-            var = IntVar()
-            self.c = Checkbutton(self, text="K-Means", variable=var)
+            self.use_k_means = IntVar()
+            self.c = Checkbutton(self, text="K-Means", variable=self.use_k_means)
             self.c.grid(row=6, column=0)
+
+            #Learning rate
+            learningLabel = Label(self, text="Learning Rate")
+            learningLabel.grid(row=7, column=0)
+
+            self.learningRate = Entry(self)
+            self.learningRate.grid(row=7, column=1)
 
 
         #Button to start the neural net function approximation
@@ -161,12 +170,23 @@ class buildGUI(Frame):
         net_layers = self.get_mlp_layers();
         net = MLP.network(net_layers, self.actFunc.get())
         net = self.train_mlp(net)
-        self.test_mlp(net)
+        self.test_network(net)
 
 
     def run_rbf(self):
 
-        pass
+        print("Starting RBF\n------------------------------------------------")
+        # Print out what was just done:
+        print("Number of inputs: %s" % self.inputs.get())
+        print("Number of outputs: %s" % self.outputs.get())
+        print("Number of examples: %s" % self.examples.get())
+        print("Learning rate: %s" % self.learningRate.get())
+
+        net_layers = self.get_rbf_layers()
+        centroids = self.get_rbf_centroids()
+        net = RBF.network(net_layers, "gaussian", centroids)
+        net.train_incremental(self.training_data, float(self.learningRate.get()))
+        self.test_network(net)
 
     def get_mlp_layers(self):
         ''' Return the array of number of nodes per layer for the MLP network'''
@@ -178,6 +198,32 @@ class buildGUI(Frame):
         net_layers.append(int(self.outputs.get()))
 
         return net_layers
+
+    def get_rbf_layers(self):
+        ''' Return the array of number of nodes per layer in the RBF network '''
+        net_layers = [int(self.inputs.get()), int(self.gaussians.get()), 
+                    int(self.outputs.get())]
+
+        return net_layers
+
+    def get_rbf_centroids(self):
+        ''' Given the method for selecting the k centroids, return an array
+            of k centroids '''
+
+        if self.use_k_means == 1:
+            #centroids = Kmeans.kMeans(int(self.gaussians.get()), self.training_data, int(self.inputs.get()))
+            pass
+        else:
+            centroids = []
+            indices = []
+            for i in range(len(self.training_data)):
+                indices.append(i)
+
+            sample_indices = np.random.choice(indices, int(self.gaussians.get()), replace = False)
+            for ind in sample_indices:
+                centroids.append(self.training_data[int(ind)].inputs)
+
+        return centroids
 
     def train_mlp(self, mlp_net):
         ''' Given the network, iterations, and update method, train the net '''
@@ -203,7 +249,7 @@ class buildGUI(Frame):
 
         return net
 
-    def test_mlp(self, net):
+    def test_network(self, net):
         ''' Given the trained net, calculate the output of the net
             Print the root mean square error to the console by default
             If write output is set, create a CSV with the test inputs,

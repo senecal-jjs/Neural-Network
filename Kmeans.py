@@ -14,7 +14,7 @@ class kMeans:
 		for i in range(self.k):
 			randomVector = []
 			for j in range(self.n):
-				randomVector.append(random.uniform(-10, 10)) #This range should be same as one in trainingArray.py
+				randomVector.append(random.uniform(-1, 1)) #This range should be same as one in trainingArray.py
 			self.currCentroids.append(randomVector)
 			self.oldCentroids.append([])
 
@@ -42,7 +42,7 @@ class kMeans:
 			if cluster == []:
 				randVector = []
 				for j in range(self.n):
-					randVector.append(random.uniform(-10, 10))
+					randVector.append(random.uniform(-1, 1))
 				meanVectors.append(randVector)
 			else:
 				meanVector = np.mean(cluster, axis = 0)
@@ -67,23 +67,3 @@ class kMeans:
 		while not self.hasConverged():
 			self.assignInputs()
 		return self.currCentroids
-
-	
-
-if __name__ == '__main__':
-	
-	testInput = []
-	for i in range(1000):
-		sample = []
-		for j in range(3):
-			sample.append(random.uniform(-10, 10))
-		testInput.append(sample)
-	thing = kMeans(15, testInput, 3)
-	#thing.initializeCentroids()
-	#for item in thing.currCentroids:
-	#	print (item)
-	#print (" ")
-	
-	testK = thing.calculateKMeans()
-	for test in testK:
-		print (test)
