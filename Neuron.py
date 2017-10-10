@@ -26,6 +26,13 @@ class neuron:
             output = np.tanh(i_inputs)
 
         elif self.function_type == "gaussian":
-            output = np.exp(-((np.linalg.norm(np.subtract(i_inputs, in_Kvectors)) ** 2) / (2 * (self.sigma ** 2))))
+            if i_want_derivative:  # Derivatives not needed for backprop in RBF network
+                output = np.zeros(len(i_inputs))
+            else:
+                # in_Kvectors is a list of tuples
+                num_nodes = len(in_Kvectors)
+                output = np.zeros(num_nodes)
+                for i in range(num_nodes):
+                    output[i] = np.exp(-((np.linalg.norm(np.subtract(i_inputs, in_Kvectors[i])) ** 2) / (2 * (self.sigma ** 2))))
 
         return output

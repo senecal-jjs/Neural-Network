@@ -3,10 +3,11 @@ import Neuron
 
 
 class layer:
-    def __init__(self, weight_size, activation_function, input_layer = False, output_layer = False, in_sigma=None):
+    def __init__(self, weight_size, activation_function, input_layer = False, output_layer = False, in_sigma=None, k_means=None):
         self.input_layer = input_layer
         self.output_layer = output_layer
-        self.weight_size = weight_size  # (neurons in prev layer, neurons in next layer)
+        self.weight_size = weight_size  # dimensions of weight matrix
+        self.k_means = k_means
 
         # Holds output and input vector for the layer
         self.outputs = np.zeros(weight_size[0])
@@ -30,14 +31,13 @@ class layer:
         if not output_layer and not input_layer:
             self.derivatives=np.zeros(weight_size[0])
 
-
     # Calculate output for layer's neurons
     def calculate_output(self):
         if self.input_layer:
             return self.outputs.dot(self.weights)
 
         # Run inputs through the activation function
-        self.outputs = self.neuron.calculate_output(i_inputs=self.inputs, in_Kvectors=None)
+        self.outputs = self.neuron.calculate_output(i_inputs=self.inputs, in_Kvectors=self.k_means)
         if self.output_layer:
             return self.outputs
         else:
