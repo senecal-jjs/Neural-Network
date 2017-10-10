@@ -1,4 +1,6 @@
 import numpy as np
+from typing import Sequence
+from trainingArray import trial_run
 import Layer
 
 
@@ -28,5 +30,9 @@ class network:
         weight_change = -learning_rate * np.outer(self.layers[2].delta_values, self.layers[1].outputs).T
         self.layers[1].weights += weight_change
 
-    def train_incremental(self):
+    def train_incremental(self, training_data: Sequence[trial_run], learning_rate):
+        for data_point in training_data:
+            output = self.calculate_outputs(data_point.inputs)
+            self.backpropagate(output, data_point.solution)
+            self.update_weights(learning_rate)
         print('test')
