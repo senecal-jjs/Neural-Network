@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import ttk
 import urllib3
 import trainingArray
 import MLP
@@ -58,10 +59,13 @@ class buildGUI(Frame):
         self.w.grid(row = 8, column = 1)
 
         #Check box for whether or not to create a csv output file
-        wo = IntVar()
-        self.w = Checkbutton(self, text="Write output", variable=wo)
-        self.w.grid(row=10, column=0)
-        self.write_output = wo.get()
+        #wo = IntVar()
+        #self.w = Checkbutton(self, text="Write output", variable=wo)
+        #self.w.grid(row=10, column=0)
+        #self.write_output = wo.get()
+
+        self.write_output = ttk.Checkbutton(self, text="Write Output")
+        self.write_output.grid(row=10, column = 0)
 
 
         if self.nnType == "Feed-forward":
@@ -120,9 +124,12 @@ class buildGUI(Frame):
             self.sigma.grid(row=5, column=1)
 
             #Check box for whether or not to use K means clustering
-            self.use_k_means = IntVar()
-            self.c = Checkbutton(self, text="K-Means", variable=self.use_k_means)
-            self.c.grid(row=6, column=0)
+            #self.use_k_means = IntVar()
+            #self.c = Checkbutton(self, text="K-Means", variable=self.use_k_means, onvalue="k", offvalue="noK")
+            #self.c.grid(row=6, column=0)
+
+            self.use_k_means = ttk.Checkbutton(self, text="K-Means")
+            self.use_k_means.grid(row = 6, column=0)
 
             #Learning rate
             learningLabel = Label(self, text="Learning Rate")
@@ -138,18 +145,20 @@ class buildGUI(Frame):
 
     def approx_function(self):
 
-        dataHandler = trainingArray.trainingArray(int(self.inputs.get()), int(self.examples.get()))
-        self.data = dataHandler.createTrainingData()
+        for i in range(int(self.tests.get())):
+            print ("Starting test " + str(i + 1) + " of " + str(self.tests.get()) + "...")
+            dataHandler = trainingArray.trainingArray(int(self.inputs.get()), int(self.examples.get()))
+            self.data = dataHandler.createTrainingData()
 
-        split = int((len(self.data) / 3) * 2)
-        self.training_data = self.data[:split]
-        self.testing_data = self.data[split:]
+            split = int((len(self.data) / 3) * 2)
+            self.training_data = self.data[:split]
+            self.testing_data = self.data[split:]
 
-        if self.nnType == "Feed-forward":
-            self.run_mlp()
+            if self.nnType == "Feed-forward":
+                self.run_mlp()
 
-        if self.nnType == "Radial Basis":
-            self.run_rbf()
+            if self.nnType == "Radial Basis":
+                self.run_rbf()
 
         exit()
 
@@ -184,6 +193,7 @@ class buildGUI(Frame):
 
         net_layers = self.get_rbf_layers()
         centroids = self.get_rbf_centroids()
+        print (centroids)
         net = RBF.network(net_layers, "gaussian", centroids)
         net.train_incremental(self.training_data, float(self.learningRate.get()))
         self.test_network(net)
@@ -210,9 +220,15 @@ class buildGUI(Frame):
         ''' Given the method for selecting the k centroids, return an array
             of k centroids '''
 
-        if self.use_k_means == 1:
-            #centroids = Kmeans.kMeans(int(self.gaussians.get()), self.training_data, int(self.inputs.get()))
-            pass
+        k_means = False
+        for state in self.use_k_means.state():
+            if state == "selected":
+                k_means = True
+
+        if k_means:
+            training_inputs = [example.inputs for example in self.training_data]
+            centroids = Kmeans.kMeans(int(self.gaussians.get()), training_inputs, int(self.inputs.get())).calculateKMeans()
+        
         else:
             centroids = []
             indices = []
@@ -263,12 +279,17 @@ class buildGUI(Frame):
             data_in = testInput.inputs
             out_val = net.calculate_outputs(data_in)[0]
             output_vals.append(out_val)
+            input_vals.append(data_in)
 
         error = self.rmse(output_vals, true_vals)
         print ("RMSE: %f\n" % error)
 
-        if self.write_output == 1:
-            self.create_csv(inputs, output_vals);
+        write = False
+        for state in self.write_output.state():
+            if state == "selected":
+                write = True
+        if write:
+            self.create_csv(input_vals, output_vals, true_vals);
 
     def rmse(self, predicted, true):
         ''' Given arrays of predicted and true values, calculate
@@ -276,7 +297,7 @@ class buildGUI(Frame):
 
         return np.sqrt(((np.array(predicted) - np.array(true)) ** 2).mean())
 
-    def create_csv(self, inputs, outputs, true):
+    def create_csv(self, inputs, outputs, true_values):
         ''' Create a csv file with the test inputs, calculated outputs,
             true values and relevant statistics. '''
 
