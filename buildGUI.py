@@ -108,19 +108,19 @@ class buildGUI(Frame):
             self.learningRate.grid(row=9, column=1)
 
         if self.nnType == "Radial Basis":
+            # Entry for number of iterations
+            iterationsLabel = Label(self, text="Training iterations")
+            iterationsLabel.grid(row=4, column=0)
+
+            self.iterations = Entry(self)
+            self.iterations.grid(row=4, column=1)
+
             #Number of Gaussians to use
             gaussianLabel = Label(self, text="Number of Gaussians (k)")
-            gaussianLabel.grid(row=4, column=0)
+            gaussianLabel.grid(row=5, column=0)
 
             self.gaussians = Entry(self)
-            self.gaussians.grid(row=4, column=1)
-
-            #Enter the value of sigma for Gaussians
-            sigmaLabel = Label(self, text="Sigma")
-            sigmaLabel.grid(row=5, column=0)
-
-            self.sigma = Entry(self)
-            self.sigma.grid(row=5, column=1)
+            self.gaussians.grid(row=5, column=1)
 
             #Check box for whether or not to use K means clustering
             #self.use_k_means = IntVar()
@@ -175,7 +175,7 @@ class buildGUI(Frame):
         print("Training iterations: %s\n" % self.iterations.get())
 
         # Set the number of nodes per layer as input for the MLP net
-        net_layers = self.get_mlp_layers();
+        net_layers = self.get_mlp_layers()
         net = MLP.network(net_layers, self.actFunc.get())
         net = self.train_mlp(net)
         self.test_network(net)
@@ -188,13 +188,15 @@ class buildGUI(Frame):
         print("Number of inputs: %s" % self.inputs.get())
         print("Number of outputs: %s" % self.outputs.get())
         print("Number of examples: %s" % self.examples.get())
+        print("Number of Hidden Nodes: %s" % self.gaussians.get())
         print("Learning rate: %s" % self.learningRate.get())
+        print("Training iterations: %s\n" % self.iterations.get())
 
         net_layers = self.get_rbf_layers()
         centroids = self.get_rbf_centroids()
-        print (centroids)
+        # print (centroids)
         net = RBF.network(net_layers, "gaussian", centroids)
-        net.train_incremental(self.training_data, float(self.learningRate.get()))
+        self.train_RBF(net)
         self.test_network(net)
 
     def get_mlp_layers(self):
@@ -225,10 +227,12 @@ class buildGUI(Frame):
                 k_means = True
 
         if k_means:
+            print("K means selected!")
             training_inputs = [example.inputs for example in self.training_data]
             centroids = Kmeans.kMeans(int(self.gaussians.get()), training_inputs, int(self.inputs.get())).calculateKMeans()
         
         else:
+            print("ELSE!")
             centroids = []
             indices = []
             for i in range(len(self.training_data)):
@@ -263,6 +267,12 @@ class buildGUI(Frame):
                 net.train_stochastic(self.training_data, batch_size, num_batches, learning)
 
         return net
+
+    def train_RBF(self, rbf_net):
+        for i in range(int(self.iterations.get())):
+            if i % 100 == 0:
+                print ("Beginning iteration " + str(i) + " of " + self.iterations.get() + "...")
+            rbf_net.train_incremental(self.training_data, float(self.learningRate.get()))
 
     def test_network(self, net):
         ''' Given the trained net, calculate the output of the net

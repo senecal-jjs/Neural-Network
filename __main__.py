@@ -5,7 +5,7 @@ import random
 import MLP
 import RBF
 import Kmeans
-#import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 class buildNNMenu(Frame):
     def __init__(self, master = None):
@@ -43,7 +43,7 @@ if __name__ == '__main__':
 
     # Network initialization: ([No. Inputs, Neurons per Layer...], "activation function")
     # test_input = []
-    # layer_structure = np.array([2, 70, 1])
+    # layer_structure = np.array([2, 60, 1])
     # num_examples = 500
     # for i in range(num_examples):
     #     sample = []
@@ -78,6 +78,10 @@ if __name__ == '__main__':
     # print("True Value")
     # print(label[2])
     # print(net.calculate_outputs(test_input[2]))
+    # print(label[6])
+    # print(net.calculate_outputs(test_input[6]))
+    # print(label[70])
+    # print(net.calculate_outputs(test_input[70]))
     # plt.show()
     '''net = MLP.network([2, 35, 35, 1], "sigmoid")
 
