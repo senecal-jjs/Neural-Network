@@ -1,6 +1,5 @@
 from tkinter import *
 from tkinter import ttk
-import urllib3
 import trainingArray
 import MLP
 import numpy as np
@@ -68,7 +67,7 @@ class buildGUI(Frame):
         self.write_output.grid(row=10, column = 0)
 
 
-        if self.nnType == "Feed-forward":
+        if self.nnType == "Perceptron":
             #Entry for number of iterations
             iterationsLabel = Label(self, text="Training iterations")
             iterationsLabel.grid(row=4, column=0)
@@ -154,7 +153,7 @@ class buildGUI(Frame):
             self.training_data = self.data[:split]
             self.testing_data = self.data[split:]
 
-            if self.nnType == "Feed-forward":
+            if self.nnType == "Perceptron":
                 self.run_mlp()
 
             if self.nnType == "Radial Basis":
@@ -163,7 +162,7 @@ class buildGUI(Frame):
         exit()
 
     def run_mlp(self):
-        print("Starting MPL\n------------------------------------------------")
+        print("Starting MLP\n------------------------------------------------")
         # Print out what was just done:
         print("Number of inputs: %s" % self.inputs.get())
         print("Number of outputs: %s" % self.outputs.get())
