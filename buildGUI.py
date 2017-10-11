@@ -1,5 +1,4 @@
 from tkinter import *
-import urllib3
 import trainingArray
 import MLP
 import numpy as np
@@ -19,35 +18,35 @@ class buildGUI(Frame):
         self.pack(fill=BOTH, expand=1)
 
 
-        #Entry for number of inputs
+        # Entry for number of inputs
         inputsLabel = Label(self, text="Number of inputs")
         inputsLabel.grid(row=0, column=0)
 
         self.inputs = Entry(self)
         self.inputs.grid(row=0, column=1)
 
-        #Entry for number of outputs
+        # Entry for number of outputs
         outputsLabel = Label(self, text="Number of outputs")
         outputsLabel.grid(row=1, column=0)
 
         self.outputs = Entry(self)
         self.outputs.grid(row=1, column=1)
 
-        #Entry for number of training examples
+        # Entry for number of training examples
         examplesLabel = Label(self, text="Number of examples")
         examplesLabel.grid(row=2, column=0)
 
         self.examples = Entry(self)
         self.examples.grid(row=2, column=1)
 
-        #Entry for number of tests to run
+        # Entry for number of tests to run
         testsLabel = Label(self, text="Number of tests")
         testsLabel.grid(row=3, column=0)
 
         self.tests = Entry(self)
         self.tests.grid(row=3, column=1)
 
-        #Update method
+        # Update method
         updateLabel = Label(self, text="Update method")
         updateLabel.grid(row=8, column=0)
         options = ["incremental", "batch", "stochastic"]
@@ -57,36 +56,36 @@ class buildGUI(Frame):
         self.w = OptionMenu(self, self.update_method, *options)
         self.w.grid(row = 8, column = 1)
 
-        #Check box for whether or not to create a csv output file
+        # Check box for whether or not to create a csv output file
         wo = IntVar()
         self.w = Checkbutton(self, text="Write output", variable=wo)
         self.w.grid(row=10, column=0)
         self.write_output = wo.get()
 
 
-        if self.nnType == "Feed-forward":
-            #Entry for number of iterations
+        if self.nnType == "Perceptron":
+            # Entry for number of iterations
             iterationsLabel = Label(self, text="Training iterations")
             iterationsLabel.grid(row=4, column=0)
 
             self.iterations = Entry(self)
             self.iterations.grid(row=4, column=1)
 
-            #Number of hidden layers
+            # Number of hidden layers
             hiddenLabel = Label(self, text="Hidden Layers")
             hiddenLabel.grid(row=5, column=0)
 
             self.hiddenLayers = Entry(self)
             self.hiddenLayers.grid(row=5, column=1)
 
-            #Number of nodes per layer
+            # Number of nodes per layer
             nodesLabel = Label(self, text="Number of Nodes")
             nodesLabel.grid(row=6, column=0)
 
             self.nodes = Entry(self)
             self.nodes.grid(row=6, column=1)
 
-            #Activation function selection menu
+            # Activation function selection menu
             menuLabel = Label(self, text="Activation Function")
             menuLabel.grid(row=7, column=0)
 
@@ -97,7 +96,7 @@ class buildGUI(Frame):
             self.w = OptionMenu(self, self.actFunc, *menuOptions)
             self.w.grid(row = 7, column = 1)
 
-            #Learning rate
+            # Learning rate
             learningLabel = Label(self, text="Learning Rate")
             learningLabel.grid(row=9, column=0)
 
@@ -105,19 +104,19 @@ class buildGUI(Frame):
             self.learningRate.grid(row=9, column=1)
 
         if self.nnType == "Radial Basis":
-            #Number of Gaussians to use
+            # Entry for number of iterations
+            iterationsLabel = Label(self, text="Training iterations")
+            iterationsLabel.grid(row=4, column=0)
+
+            self.iterations = Entry(self)
+            self.iterations.grid(row=4, column=1)
+
+            # Number of Gaussians to use
             gaussianLabel = Label(self, text="Number of Gaussians (k)")
-            gaussianLabel.grid(row=4, column=0)
+            gaussianLabel.grid(row=5, column=0)
 
             self.gaussians = Entry(self)
-            self.gaussians.grid(row=4, column=1)
-
-            #Enter the value of sigma for Gaussians
-            sigmaLabel = Label(self, text="Sigma")
-            sigmaLabel.grid(row=5, column=0)
-
-            self.sigma = Entry(self)
-            self.sigma.grid(row=5, column=1)
+            self.gaussians.grid(row=5, column=1)
 
             #Check box for whether or not to use K means clustering
             self.use_k_means = IntVar()
@@ -145,7 +144,7 @@ class buildGUI(Frame):
         self.training_data = self.data[:split]
         self.testing_data = self.data[split:]
 
-        if self.nnType == "Feed-forward":
+        if self.nnType == "Perceptron":
             self.run_mlp()
 
         if self.nnType == "Radial Basis":
@@ -154,7 +153,7 @@ class buildGUI(Frame):
         exit()
 
     def run_mlp(self):
-        print("Starting MPL\n------------------------------------------------")
+        print("Starting MLP\n------------------------------------------------")
         # Print out what was just done:
         print("Number of inputs: %s" % self.inputs.get())
         print("Number of outputs: %s" % self.outputs.get())
@@ -174,7 +173,6 @@ class buildGUI(Frame):
 
 
     def run_rbf(self):
-
         print("Starting RBF\n------------------------------------------------")
         # Print out what was just done:
         print("Number of inputs: %s" % self.inputs.get())
@@ -185,7 +183,10 @@ class buildGUI(Frame):
         net_layers = self.get_rbf_layers()
         centroids = self.get_rbf_centroids()
         net = RBF.network(net_layers, "gaussian", centroids)
-        net.train_incremental(self.training_data, float(self.learningRate.get()))
+
+        for i in range(int(self.iterations.get())):
+            net.train_incremental(self.training_data, float(self.learningRate.get()))
+
         self.test_network(net)
 
     def get_mlp_layers(self):
@@ -202,7 +203,7 @@ class buildGUI(Frame):
     def get_rbf_layers(self):
         ''' Return the array of number of nodes per layer in the RBF network '''
         net_layers = [int(self.inputs.get()), int(self.gaussians.get()), 
-                    int(self.outputs.get())]
+                      int(self.outputs.get())]
 
         return net_layers
 
@@ -211,7 +212,7 @@ class buildGUI(Frame):
             of k centroids '''
 
         if self.use_k_means == 1:
-            #centroids = Kmeans.kMeans(int(self.gaussians.get()), self.training_data, int(self.inputs.get()))
+            # centroids = Kmeans.kMeans(int(self.gaussians.get()), self.training_data, int(self.inputs.get()))
             pass
         else:
             centroids = []

@@ -36,7 +36,6 @@ class network:
             output = self.calculate_outputs(data_point.inputs)
             self.backpropagate(output, data_point.solution)
             self.update_weights(learning_rate)
-        print('test')
 
     @staticmethod
     def calculate_sigma(k_means_vectors):

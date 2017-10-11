@@ -23,7 +23,10 @@ class neuron:
                 output = 1 / (1 + np.exp(-i_inputs))
 
         elif self.function_type == "hyperbolic":
-            output = np.tanh(i_inputs)
+            if i_want_derivative:
+                output = 1 - np.tanh(i_inputs)**2
+            else:
+                output = np.tanh(i_inputs)
 
         elif self.function_type == "gaussian":
             if i_want_derivative:  # Derivatives not needed for backprop in RBF network
