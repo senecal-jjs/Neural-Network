@@ -31,6 +31,8 @@ class network:
                                        in_sigma=self.sigma, k_means=k_means_vectors))
         self.layers.append(Layer.layer([neurons_per_layer[-1], None], "linear", output_layer=True))
 
+        self.previous_weight_change = np.zeros(self.layers[1].weights.shape)
+
     # Given a set of inputs to the input layer, calculate the output of each layer in the network
     # and return the output of the final layer
     def calculate_outputs(self, inputs):
@@ -46,16 +48,22 @@ class network:
     # Using the error that was calculated in the final layer of the network, calculate what the weight update
     # should be using gradient descent. Return the weight changes that are applied between the hidden and
     # output layer
-    def update_weights(self, learning_rate):
-        weight_change = -learning_rate * np.outer(self.layers[2].delta_values, self.layers[1].outputs).T
-        self.layers[1].weights += weight_change
+    def update_weights(self, learning_rate, use_momentum=False, beta=None):
+        if use_momentum:
+            weight_change = -learning_rate * np.outer(self.layers[2].delta_values, self.layers[1].outputs).T
+            self.layers[1].weights += (weight_change + beta * self.previous_weight_change)
+            self.previous_weight_change = (weight_change + beta * self.previous_weight_change)
+        else:
+            weight_change = -learning_rate * np.outer(self.layers[2].delta_values, self.layers[1].outputs).T
+            self.layers[1].weights += weight_change
 
     # The weights between the hidden and output layer are updated after every training example
-    def train_incremental(self, training_data: Sequence[trial_run], learning_rate):
+    def train_incremental(self, training_data: Sequence[trial_run], learning_rate, use_momentum=False, beta=None):
         for data_point in training_data:
             output = self.calculate_outputs(data_point.inputs)
             self.backpropagate(output, data_point.solution)
-            self.update_weights(learning_rate)
+            self.update_weights(learning_rate, use_momentum=use_momentum, beta=beta)
+
 
     # This method calculates the parameter 'sigma' which is required by the gaussian activation functions
     @staticmethod

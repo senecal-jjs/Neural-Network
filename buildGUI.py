@@ -63,8 +63,19 @@ class buildGUI(Frame):
         #self.w.grid(row=10, column=0)
         #self.write_output = wo.get()
 
+        # Check box if the user wants to incorporate momentum in the weight updates
+        self.use_momentum = ttk.Checkbutton(self, text="Momentum")
+        self.use_momentum.grid(row=10, column=0)
+
+        # Beta value for momentum term in weight update
+        beta_label = Label(self, text="Beta (if momentum selected)")
+        beta_label.grid(row=11, column=0)
+
+        self.beta = Entry(self)
+        self.beta.grid(row=11, column=1)
+
         self.write_output = ttk.Checkbutton(self, text="Write Output")
-        self.write_output.grid(row=10, column = 0)
+        self.write_output.grid(row=12, column = 0)
 
 
         if self.nnType == "Perceptron":
@@ -140,7 +151,7 @@ class buildGUI(Frame):
 
         #Button to start the neural net function approximation
         approximateButton = Button(self, text="Approximate Function", command=self.approx_function)
-        approximateButton.grid(row=11, column=1)
+        approximateButton.grid(row=13, column=1)
 
     def approx_function(self):
 
@@ -248,31 +259,49 @@ class buildGUI(Frame):
         net = mlp_net
         learning = float(self.learningRate.get())
 
+        # Set momentum to true if momentum was selected in the GUI
+        momentum = False
+        beta = None
+        for state in self.use_momentum.state():
+            if state == "selected":
+                momentum = True
+                beta = float(self.beta.get())
+                print("Momentum in use!")
+
         for i in range(int(self.iterations.get())):
 
             if i % 100 == 0:
-                print ("Beginning iteration " + str(i) + " of " + self.iterations.get() + "...")
+                print("Beginning iteration " + str(i) + " of " + self.iterations.get() + "...")
 
             if self.update_method.get() == "incremental":
-                net.train_incremental(self.training_data, learning)
+                net.train_incremental(self.training_data, learning, use_momentum=momentum, beta=beta)
 
             elif self.update_method.get() == "batch":
-                net.train_batch(self.training_data, learning)
+                net.train_batch(self.training_data, learning, use_momentum=momentum, beta=beta)
 
             elif self.update_method.get() == "stochastic":
 
                 batch_size = int(np.sqrt(len(self.testing_data)))
                 num_batches = int(int(self.iterations.get()) / batch_size)
-                net.train_stochastic(self.training_data, batch_size, num_batches, learning)
+                net.train_stochastic(self.training_data, batch_size, num_batches, learning, use_momentum=momentum, beta=beta)
 
         return net
 
     def train_RBF(self, rbf_net):
+        # Set momentum to true if momentum was selected in the GUI
+        momentum = False
+        beta = None
+        for state in self.use_momentum.state():
+            if state == "selected":
+                momentum = True
+                beta = float(self.beta.get())
+                print("Momentum in use!")
+
         for i in range(int(self.iterations.get())):
             if i % 100 == 0:
                 print ("Beginning iteration " + str(i) + " of " + self.iterations.get() + "...")
-                np.random.shuffle(self.training_data)
-            rbf_net.train_incremental(self.training_data, float(self.learningRate.get()))
+            np.random.shuffle(self.training_data)
+            rbf_net.train_incremental(self.training_data, float(self.learningRate.get()), use_momentum=momentum, beta=beta)
 
     def test_network(self, net):
         ''' Given the trained net, calculate the output of the net

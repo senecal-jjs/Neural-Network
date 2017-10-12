@@ -33,6 +33,7 @@ class network:
 
         # Create output layer, with linear output as the activation function
         self.layers.append(Layer.layer([neurons_per_layer[-1], None], "linear", output_layer=True))
+        self.previous_weight_change = [np.zeros(l.weights.shape) for l in self.layers[:-1]]
 
     # Given a set of inputs to the input layer, calculate the output of each layer in the network
     # and return the output of the final layer
@@ -66,9 +67,13 @@ class network:
         return weight_changes
 
     # Add the weight changes that were calculated for each layer to the weight matrix for each layer.
-    def update_weights(self, weight_changes):
-        for i in range(self.num_layers-1):
-            self.layers[i].weights += weight_changes[i]
+    def update_weights(self, weight_changes, use_momentum=False, beta=None):
+        if use_momentum:
+            for i in range(self.num_layers-1):
+                self.layers[i].weights += (weight_changes[i] + beta * self.previous_weight_change[i])
+        else:
+            for i in range(self.num_layers-1):
+                self.layers[i].weights += weight_changes[i]
 
 
     def train_until_convergence(self, training_data : Sequence[trial_run], testing_data : Sequence[trial_run],
@@ -98,14 +103,13 @@ class network:
             return False
 
 
-    def train_batch(self, training_data : Sequence[trial_run], learning_rate):
-        """Trains one batch of data
-        """
+    def train_batch(self, training_data: Sequence[trial_run], learning_rate, use_momentum=False, beta=None):
+        # Trains one batch of data
         # place to keep changes in weights:
         running_total = [np.zeros(l.weights.shape) for l in self.layers[:-1]]
         for data_point in training_data:
             output = self.calculate_outputs(data_point.inputs)
-            # internally calculate the delta values:
+            # internally calculate the delta (error) values:
             self.backpropagate(output, data_point.solution)
             # get the change in weight from those delta values:
             change = self.calc_update_weights(learning_rate)
@@ -113,20 +117,22 @@ class network:
             for i in range(len(change)):
                 running_total[i] = running_total[i] + change[i]
 
-        assert len(change) == self.num_layers-1
+        # assert len(change) == self.num_layers-1
         # divide by the batch size:
-        av_change = list(map(lambda x: np.divide(x, self.num_layers), running_total))
+        av_change = list(map(lambda x: np.divide(x, len(training_data)), running_total))
         # update the weights:
-        self.update_weights(av_change)
+        self.update_weights(av_change, use_momentum=use_momentum, beta=beta)
+        self.previous_weight_change = av_change
 
     # Perform incremental weight updating, where the network weights are updated after every training example
-    def train_incremental(self, training_data : Sequence[trial_run], learning_rate):
+    def train_incremental(self, training_data: Sequence[trial_run], learning_rate, use_momentum=False, beta=None):
+        # Use a batch size of 1, i.e. (incremental)
         for d in training_data:
-            self.train_batch([d],learning_rate)
+            self.train_batch([d],learning_rate, use_momentum=use_momentum, beta=beta)
 
     # Trains a series of random batches from the training data of size 'batch_size. Repeats 'num_batches' times
-    def train_stochastic(self, training_data : Sequence[trial_run], batch_size, num_batches, learning_rate):
+    def train_stochastic(self, training_data : Sequence[trial_run], batch_size, num_batches, learning_rate, use_momentum=False, beta=None):
         for i in range(num_batches):
-            t_set_indices = np.random.choice(range(len(training_data)),batch_size,replace=False)
+            t_set_indices = np.random.choice(range(len(training_data)), batch_size, replace=False)
             t_set = [training_data[i] for i in t_set_indices]
-            self.train_batch(t_set, learning_rate)
+            self.train_batch(t_set, learning_rate, use_momentum=use_momentum, beta=beta)
