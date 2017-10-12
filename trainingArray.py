@@ -3,6 +3,7 @@ from collections import namedtuple
 
 trial_run = namedtuple('trial_run', ['inputs', 'solution'])
 
+
 class trainingArray:
     def __init__(self, n, examples):
         self.n = n

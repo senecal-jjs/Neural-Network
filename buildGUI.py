@@ -194,6 +194,7 @@ class buildGUI(Frame):
 
         net_layers = self.get_rbf_layers()
         centroids = self.get_rbf_centroids()
+        print("Centroids computed!\n")
         # print (centroids)
         net = RBF.network(net_layers, "gaussian", centroids)
         self.train_RBF(net)
@@ -227,12 +228,10 @@ class buildGUI(Frame):
                 k_means = True
 
         if k_means:
-            print("K means selected!")
             training_inputs = [example.inputs for example in self.training_data]
             centroids = Kmeans.kMeans(int(self.gaussians.get()), training_inputs, int(self.inputs.get())).calculateKMeans()
         
         else:
-            print("ELSE!")
             centroids = []
             indices = []
             for i in range(len(self.training_data)):
@@ -272,6 +271,7 @@ class buildGUI(Frame):
         for i in range(int(self.iterations.get())):
             if i % 100 == 0:
                 print ("Beginning iteration " + str(i) + " of " + self.iterations.get() + "...")
+                np.random.shuffle(self.training_data)
             rbf_net.train_incremental(self.training_data, float(self.learningRate.get()))
 
     def test_network(self, net):
