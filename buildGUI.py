@@ -204,7 +204,7 @@ class buildGUI(Frame):
         print("Number of Hidden Nodes: %s" % self.gaussians.get())
         print("Learning rate: %s" % self.learningRate.get())
         print("Training iterations: %s\n" % self.iterations.get())
-
+        print("Computing centroids...")
         net_layers = self.get_rbf_layers()
         centroids = self.get_rbf_centroids()
         print("Centroids computed!\n")

@@ -1,5 +1,5 @@
-set xlabel 'input 1'
-set ylabel 'input 2'
+set xlabel 'x_1'
+set ylabel 'x_2'
 set zlabel 'output'
 set dgrid 20 20
 set datafile separator ","
