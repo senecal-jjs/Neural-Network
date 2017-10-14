@@ -1,12 +1,13 @@
 from tkinter import *
 from tkinter import ttk
-import os, errno, getpass # for file writing
 import trainingArray
 import MLP
-import time
 import numpy as np
 import Kmeans
 import RBF
+from collections import namedtuple
+
+trial_run = namedtuple('trial_run', ['inputs', 'solution'])
 
 
 class buildGUI(Frame):
@@ -43,11 +44,11 @@ class buildGUI(Frame):
         self.examples.grid(row=2, column=1)
 
         #Entry for number of tests to run
-        testsLabel = Label(self, text="Number of tests")
-        testsLabel.grid(row=3, column=0)
+        #testsLabel = Label(self, text="Number of tests")
+        #testsLabel.grid(row=3, column=0)
 
-        self.tests = Entry(self)
-        self.tests.grid(row=3, column=1)
+        #self.tests = Entry(self)
+        #self.tests.grid(row=3, column=1)
 
         #Update method
         updateLabel = Label(self, text="Update method")
@@ -157,35 +158,51 @@ class buildGUI(Frame):
 
     def approx_function(self):
 
-        for i in range(int(self.tests.get())):
-            print ("Starting test " + str(i + 1) + " of " + str(self.tests.get()) + "...")
-            dataHandler = trainingArray.trainingArray(int(self.inputs.get()), int(self.examples.get()))
-            self.data = dataHandler.createTrainingData()
+        #for i in range(int(self.tests.get())):
+        	#print ("Starting test " + str(i + 1) + " of " + str(self.tests.get()) + "...")
+        dataHandler = trainingArray.trainingArray(int(self.inputs.get()), int(self.examples.get()))
+        self.data = np.array(dataHandler.createTrainingData())
 
-            split = int((len(self.data) / 3) * 2)
-            self.training_data = self.data[:split]
-            self.testing_data = self.data[split:]
+        data_folds = np.split(self.data, 10)
+
+        #print ("data folds:")
+        #print (data_folds)
+        self.print_starting_info()
+
+        for i in range(10):
+
+            print ("Starting fold " + str(i+1) + " of 10...")
+            self.training_data = []
+            self.testing_data = []
+            self.validation_data = []
+            [self.testing_data.append(trial_run(item[0], item[1])) for item in data_folds[i]]
+            [self.validation_data.append(trial_run(item[0], item[1])) for item in data_folds[i-1]]
+            for j in range(10):
+                if j != i and j != i-1:
+                    [self.training_data.append(trial_run(item[0], item[1])) for item in data_folds[j]]
+
+        	#print ("train: ")
+        	#print (self.training_data)
+        	#print ("validate:")
+        	#print (self.validation_data)
+        	#print ("test")
+        	#print (self.testing_data)
+
+            #split = int((len(self.data) / 3) * 2)
+            #self.training_data = self.data[:split]
+            #self.testing_data = self.data[split:]
 
             if self.nnType == "Perceptron":
                 self.run_mlp()
-
+                
             if self.nnType == "Radial Basis":
                 self.run_rbf()
+
+            print("----------------------------------------")
 
         exit()
 
     def run_mlp(self):
-        print("Starting MLP\n------------------------------------------------")
-        # Print out what was just done:
-        print("Number of inputs: %s" % self.inputs.get())
-        print("Number of outputs: %s" % self.outputs.get())
-        print("Number of examples: %s" % self.examples.get())
-        print("Hidden Layers: %s" % self.hiddenLayers.get())
-        print("Nodes per hidden layer: %s" % self.nodes.get())
-        print("Activation function: %s" % self.actFunc.get())
-        print("Update method: %s" % self.update_method.get())
-        print("Learning rate: %s" % self.learningRate.get())
-        print("Training iterations: %s\n" % self.iterations.get())
 
         # Set the number of nodes per layer as input for the MLP net
         net_layers = self.get_mlp_layers()
@@ -196,15 +213,6 @@ class buildGUI(Frame):
 
     def run_rbf(self):
 
-        print("Starting RBF\n------------------------------------------------")
-        # Print out what was just done:
-        print("Number of inputs: %s" % self.inputs.get())
-        print("Number of outputs: %s" % self.outputs.get())
-        print("Number of examples: %s" % self.examples.get())
-        print("Number of Hidden Nodes: %s" % self.gaussians.get())
-        print("Learning rate: %s" % self.learningRate.get())
-        print("Training iterations: %s\n" % self.iterations.get())
-        print("Computing centroids...")
         net_layers = self.get_rbf_layers()
         centroids = self.get_rbf_centroids()
         print("Centroids computed!\n")
@@ -340,36 +348,29 @@ class buildGUI(Frame):
     def create_csv(self, inputs, outputs, true_values):
         ''' Create a csv file with the test inputs, calculated outputs,
             true values and relevant statistics. '''
-        user = getpass.getuser()
-        time_start = time.strftime("%m-%d:%H:%M")
-        print("Writing output at time: " + time_start)
 
-        folder_dir = os.path.abspath("./outputs")
-        # Make output directory
-        try:
-            os.makedirs(folder_dir)
-            print("Output directory created at " + folder_dir)
-        except OSError as e:
-            if e.errno != errno.EEXIST:
-                raise
+        print("Writing output...")
 
-        file_name = folder_dir + "/" + user + "_" + self.nnType + "_" + time_start + ".csv"
-        print("Writing output to " + file_name)
+    def print_starting_info(self):
+        if self.nnType == "Perceptron":
+            print("Starting MLP\n------------------------------------------------")
+            # Print out what was just done:
+            print("Number of inputs: %s" % self.inputs.get())
+            print("Number of outputs: %s" % self.outputs.get())
+            print("Number of examples: %s" % self.examples.get())
+            print("Hidden Layers: %s" % self.hiddenLayers.get())
+            print("Nodes per hidden layer: %s" % self.nodes.get())
+            print("Activation function: %s" % self.actFunc.get())
+            print("Update method: %s" % self.update_method.get())
+            print("Learning rate: %s" % self.learningRate.get())
+            print("Training iterations: %s\n" % self.iterations.get())
 
-        with open(file_name, "w") as f:
-            # print the comments explaining what is in the file
-            f.write("# File created at time " + time_start + " by " + user + " using " + self.nnType + "\n")
-            f.write("# First %s vals: inputs, Second %s vals: outputs. Third %s: true values\n" % (len(inputs[0]), 1, 1))
-            # done with the setup: now for the data
-            for ins, outs, trues in zip(inputs, outputs, true_values):
-                # write the inputs:
-                f.write(str(ins[0]))
-                for i in ins[1:]:
-                    f.write(",%f" % i)
-                # output:
-                f.write(",%f" % outs)
-                # true value:
-                f.write(",%f\n" % trues)
-            # end for
-        # end open
-        print("Done writing file")
+        if self.nnType == "Radial Basis":
+            print("Starting RBF\n------------------------------------------------")
+            # Print out what was just done:
+            print("Number of inputs: %s" % self.inputs.get())
+            print("Number of outputs: %s" % self.outputs.get())
+            print("Number of examples: %s" % self.examples.get())
+            print("Number of Hidden Nodes: %s" % self.gaussians.get())
+            print("Learning rate: %s" % self.learningRate.get())
+            print("Training iterations: %s\n" % self.iterations.get())
