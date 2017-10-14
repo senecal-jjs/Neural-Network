@@ -161,7 +161,7 @@ class buildGUI(Frame):
     def approx_function(self):
 
         #for i in range(int(self.tests.get())):
-        	#print ("Starting test " + str(i + 1) + " of " + str(self.tests.get()) + "...")
+            #print ("Starting test " + str(i + 1) + " of " + str(self.tests.get()) + "...")
         dataHandler = trainingArray.trainingArray(int(self.inputs.get()), int(self.examples.get()))
         self.data = np.array(dataHandler.createTrainingData())
 
@@ -183,12 +183,12 @@ class buildGUI(Frame):
                 if j != i and j != i-1:
                     [self.training_data.append(trial_run(item[0], item[1])) for item in data_folds[j]]
 
-        	#print ("train: ")
-        	#print (self.training_data)
-        	#print ("validate:")
-        	#print (self.validation_data)
-        	#print ("test")
-        	#print (self.testing_data)
+            #print ("train: ")
+            #print (self.training_data)
+            #print ("validate:")
+            #print (self.validation_data)
+            #print ("test")
+            #print (self.testing_data)
 
             #split = int((len(self.data) / 3) * 2)
             #self.training_data = self.data[:split]
@@ -227,11 +227,11 @@ class buildGUI(Frame):
         ''' Return the array of number of nodes per layer for the MLP network'''
         net_layers = [int(self.inputs.get())]
 
-        for lay in range(int(self.hiddenLayers.get())):
-            net_layers.append(int(self.nodes.get())) 
+        for lay in self.nodes.get().split(','):
+            net_layers.append(int(lay))
 
         net_layers.append(int(self.outputs.get()))
-
+        
         return net_layers
 
     def get_rbf_layers(self):
@@ -431,3 +431,4 @@ class buildGUI(Frame):
             print("Number of Hidden Nodes: %s" % self.gaussians.get())
             print("Learning rate: %s" % self.learningRate.get())
             print("Training iterations: %s\n" % self.iterations.get())
+
