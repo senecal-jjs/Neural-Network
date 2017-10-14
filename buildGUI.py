@@ -75,7 +75,7 @@ class buildGUI(Frame):
 
         if self.nnType == "Perceptron":
             #Entry for number of iterations
-            iterationsLabel = Label(self, text="Training iterations")
+            iterationsLabel = Label(self, text="Maximum iterations")
             iterationsLabel.grid(row=4, column=0)
 
             self.iterations = Entry(self)
@@ -125,7 +125,7 @@ class buildGUI(Frame):
 
         if self.nnType == "Radial Basis":
             # Entry for number of iterations
-            iterationsLabel = Label(self, text="Training iterations")
+            iterationsLabel = Label(self, text="Maximum iterations")
             iterationsLabel.grid(row=4, column=0)
 
             self.iterations = Entry(self)
@@ -271,6 +271,7 @@ class buildGUI(Frame):
         net = mlp_net
         learning = float(self.learningRate.get())
         RMSE = []
+        error = 999
 
         # Set momentum to true if momentum was selected in the GUI
         momentum = False
@@ -281,10 +282,22 @@ class buildGUI(Frame):
                 beta = float(self.beta.get())
                 print("Momentum in use!")
 
+        if int(self.inputs.get()) == 2:
+            cut_off = .25
+        if int(self.inputs.get()) == 3:
+            cut_off = 1
+        if int(self.inputs.get()) == 4:
+            cut_off = 5
+        if int(self.inputs.get()) == 5:
+            cut_off = 15
+        if int(self.inputs.get()) == 6:
+            cut_off = 25
+
+
         for i in range(int(self.iterations.get())):
 
             if i % 100 == 0:
-                print("Beginning iteration " + str(i) + " of " + self.iterations.get() + "...")
+                print("Beginning iteration " + str(i) + " of " + self.iterations.get() + "...with rmse of: " + str(error))
 
             if self.update_method.get() == "incremental":
                 net.train_incremental(self.training_data, learning, use_momentum=momentum, beta=beta)
@@ -297,13 +310,19 @@ class buildGUI(Frame):
                 batch_size = int(np.sqrt(len(self.testing_data)))
                 num_batches = int(int(self.iterations.get()) / batch_size)
                 net.train_stochastic(self.training_data, batch_size, num_batches, learning, use_momentum=momentum, beta=beta)
+            
+            error = self.validate_network(net)
+            RMSE.append(error)
+            
+            if error < cut_off:
+                break
 
-            RMSE.append(self.validate_network(net))
 
         return net, RMSE
 
     def train_RBF(self, rbf_net):
         RMSE = []
+        error = 999
 
         # Set momentum to true if momentum was selected in the GUI
         momentum = False
@@ -314,12 +333,28 @@ class buildGUI(Frame):
                 beta = float(self.beta.get())
                 print("Momentum in use!")
 
+        if int(self.inputs.get()) == 2:
+            cut_off = .25
+        if int(self.inputs.get()) == 3:
+            cut_off = 1
+        if int(self.inputs.get()) == 4:
+            cut_off = 5
+        if int(self.inputs.get()) == 5:
+            cut_off = 15
+        if int(self.inputs.get()) == 6:
+            cut_off = 25
+
         for i in range(int(self.iterations.get())):
             if i % 100 == 0:
-                print ("Beginning iteration " + str(i) + " of " + self.iterations.get() + "...")
+                print ("Beginning iteration " + str(i) + " of " + self.iterations.get() + "...with rmse of: " + str(error))
             np.random.shuffle(self.training_data)
             rbf_net.train_incremental(self.training_data, float(self.learningRate.get()), use_momentum=momentum, beta=beta)
-            RMSE.append(self.validate_network(rbf_net))
+            
+            error = self.validate_network(rbf_net)
+            RMSE.append(error)
+            
+            if error < cut_off:
+                break
 
         return rbf_net, RMSE
 
