@@ -209,20 +209,19 @@ class buildGUI(Frame):
         # Set the number of nodes per layer as input for the MLP net
         net_layers = self.get_mlp_layers()
         net = MLP.network(net_layers, self.actFunc.get())
-        net = self.train_mlp(net)
-        self.test_network(net)
+        net_rmse = self.train_mlp(net)
+        self.test_network(net_rmse[0], rmse_vals=net_rmse[1])
 
 
     def run_rbf(self):
-
         print("Computing centroids...")
         net_layers = self.get_rbf_layers()
         centroids = self.get_rbf_centroids()
         print("Centroids computed!\n")
         # print (centroids)
         net = RBF.network(net_layers, "gaussian", centroids)
-        self.train_RBF(net)
-        self.test_network(net)
+        net_rmse = self.train_RBF(net)
+        self.test_network(net_rmse[0], rmse_vals=net_rmse[1])
 
     def get_mlp_layers(self):
         ''' Return the array of number of nodes per layer for the MLP network'''
@@ -271,6 +270,7 @@ class buildGUI(Frame):
         ''' Given the network, iterations, and update method, train the net '''
         net = mlp_net
         learning = float(self.learningRate.get())
+        RMSE = []
 
         # Set momentum to true if momentum was selected in the GUI
         momentum = False
@@ -298,9 +298,13 @@ class buildGUI(Frame):
                 num_batches = int(int(self.iterations.get()) / batch_size)
                 net.train_stochastic(self.training_data, batch_size, num_batches, learning, use_momentum=momentum, beta=beta)
 
-        return net
+            RMSE.append(self.validate_network(net))
+
+        return net, RMSE
 
     def train_RBF(self, rbf_net):
+        RMSE = []
+
         # Set momentum to true if momentum was selected in the GUI
         momentum = False
         beta = None
@@ -315,8 +319,23 @@ class buildGUI(Frame):
                 print ("Beginning iteration " + str(i) + " of " + self.iterations.get() + "...")
             np.random.shuffle(self.training_data)
             rbf_net.train_incremental(self.training_data, float(self.learningRate.get()), use_momentum=momentum, beta=beta)
+            RMSE.append(self.validate_network(rbf_net))
 
-    def test_network(self, net):
+        return rbf_net, RMSE
+
+    def validate_network(self, net):
+        output_vals = []
+        true_vals = [test.solution for test in self.validation_data]
+
+        for testInput in self.validation_data:
+            data_in = testInput.inputs
+            out_val = net.calculate_outputs(data_in)[0]
+            output_vals.append(out_val)
+
+        error = self.rmse(output_vals, true_vals)
+        return error
+
+    def test_network(self, net, rmse_vals=None):
         ''' Given the trained net, calculate the output of the net
             Print the root mean square error to the console by default
             If write output is set, create a CSV with the test inputs,
@@ -340,7 +359,7 @@ class buildGUI(Frame):
             if state == "selected":
                 write = True
         if write:
-            self.create_csv(input_vals, output_vals, true_vals);
+            self.create_csv(input_vals, output_vals, true_vals, rmse_vals);
 
     def rmse(self, predicted, true):
         ''' Given arrays of predicted and true values, calculate
@@ -348,7 +367,7 @@ class buildGUI(Frame):
 
         return np.sqrt(((np.array(predicted) - np.array(true)) ** 2).mean())
 
-    def create_csv(self, inputs, outputs, true_values):
+    def create_csv(self, inputs, outputs, true_values, rmse_vals=None):
         ''' Create a csv file with the test inputs, calculated outputs,
             true values and relevant statistics. '''
 
@@ -382,6 +401,9 @@ class buildGUI(Frame):
                 f.write(",%f" % outs)
                 # true value:
                 f.write(",%f\n" % trues)
+
+            for error in rmse_vals:
+                f.write(",%f\n" % error)
             # end for
         # end open
         print("Done writing file")
