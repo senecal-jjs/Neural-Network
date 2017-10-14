@@ -52,16 +52,6 @@ class buildGUI(Frame):
         #self.tests = Entry(self)
         #self.tests.grid(row=3, column=1)
 
-        #Update method
-        updateLabel = Label(self, text="Update method")
-        updateLabel.grid(row=8, column=0)
-        options = ["incremental", "batch", "stochastic"]
-        self.update_method = StringVar(self.master)
-        self.update_method.set("            ")
-
-        self.w = OptionMenu(self, self.update_method, *options)
-        self.w.grid(row = 8, column = 1)
-
         #Check box for whether or not to create a csv output file
         #wo = IntVar()
         #self.w = Checkbutton(self, text="Write output", variable=wo)
@@ -122,6 +112,16 @@ class buildGUI(Frame):
 
             self.learningRate = Entry(self)
             self.learningRate.grid(row=9, column=1)
+
+            #Update method
+            updateLabel = Label(self, text="Update method")
+            updateLabel.grid(row=8, column=0)
+            options = ["incremental", "batch", "stochastic"]
+            self.update_method = StringVar(self.master)
+            self.update_method.set("            ")
+
+            self.w = OptionMenu(self, self.update_method, *options)
+            self.w.grid(row = 8, column = 1)
 
         if self.nnType == "Radial Basis":
             # Entry for number of iterations
