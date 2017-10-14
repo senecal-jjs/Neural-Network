@@ -1,7 +1,9 @@
 from tkinter import *
 from tkinter import ttk
+import os, errno, getpass # for file writing
 import trainingArray
 import MLP
+import time
 import numpy as np
 import Kmeans
 import RBF
@@ -213,6 +215,7 @@ class buildGUI(Frame):
 
     def run_rbf(self):
 
+        print("Computing centroids...")
         net_layers = self.get_rbf_layers()
         centroids = self.get_rbf_centroids()
         print("Centroids computed!\n")
@@ -349,7 +352,39 @@ class buildGUI(Frame):
         ''' Create a csv file with the test inputs, calculated outputs,
             true values and relevant statistics. '''
 
-        print("Writing output...")
+        user = getpass.getuser()
+        time_start = time.strftime("%m-%d:%H:%M:%S")
+        print("Writing output at time: " + time_start)
+
+        folder_dir = os.path.abspath("./outputs")
+        # Make output directory
+        try:
+            os.makedirs(folder_dir)
+            print("Output directory created at " + folder_dir)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
+
+        file_name = folder_dir + "/" + user + "_" + self.nnType + "_" + time_start + ".csv"
+        print("Writing output to " + file_name)
+
+        with open(file_name, "w") as f:
+            # print the comments explaining what is in the file
+            f.write("# File created at time " + time_start + " by " + user + " using " + self.nnType + "\n")
+            f.write("# First %s vals: inputs, Second %s vals: outputs. Third %s: true values\n" % (len(inputs[0]), 1, 1))
+            # done with the setup: now for the data
+            for ins, outs, trues in zip(inputs, outputs, true_values):
+                # write the inputs:
+                f.write(str(ins[0]))
+                for i in ins[1:]:
+                    f.write(",%f" % i)
+                # output:
+                f.write(",%f" % outs)
+                # true value:
+                f.write(",%f\n" % trues)
+            # end for
+        # end open
+        print("Done writing file")
 
     def print_starting_info(self):
         if self.nnType == "Perceptron":
