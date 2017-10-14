@@ -9,7 +9,7 @@ from trainingArray import trial_run
    required to train the network, as well as a method to calculate the output of the network given an arbitrary number
    of inputs.
 
-   Training of the network can be done using incremental training, or stochastic batch updating.
+   Training of the network can be done using incremental training, batch updating, or stochastic batch updating.
 
    The network can be created with an arbitrary number of nodes per layer, and an arbitrary number of layers.
 '''

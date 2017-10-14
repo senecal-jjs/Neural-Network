@@ -266,7 +266,7 @@ class buildGUI(Frame):
             if state == "selected":
                 momentum = True
                 beta = float(self.beta.get())
-                print("Momentum in use!")
+                print("Momentum in use!\n")
 
         for i in range(int(self.iterations.get())):
 
@@ -295,7 +295,7 @@ class buildGUI(Frame):
             if state == "selected":
                 momentum = True
                 beta = float(self.beta.get())
-                print("Momentum in use!")
+                print("Momentum in use!\n")
 
         for i in range(int(self.iterations.get())):
             if i % 100 == 0:
