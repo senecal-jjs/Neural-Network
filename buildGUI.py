@@ -317,7 +317,7 @@ class buildGUI(Frame):
         for i in range(int(self.iterations.get())):
             if i % 100 == 0:
                 print ("Beginning iteration " + str(i) + " of " + self.iterations.get() + "...")
-            np.random.shuffle(self.training_data)
+            # np.random.shuffle(self.training_data)
             rbf_net.train_incremental(self.training_data, float(self.learningRate.get()), use_momentum=momentum, beta=beta)
             RMSE.append(self.validate_network(rbf_net))
 
