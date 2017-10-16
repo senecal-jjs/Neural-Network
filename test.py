@@ -71,9 +71,9 @@ if __name__ == '__main__':
     num_outputs = 1
     num_examples = int(sys.argv[1])
     learning_rate = 0.005
-    num_iterations = 10
+    num_iterations = 500
     # gauss = int(sys.argv[2])
-    num_trials = 20
+    num_trials = 100
 
     total = 0
 
@@ -82,6 +82,7 @@ if __name__ == '__main__':
     for k in k_vals:
         print("For k-val: %d" % k)
         gauss = k
+        total = 0
         for i in range(num_trials):
             # print("Building training array")
             dataHandler = trainingArray.trainingArray(num_inputs, num_examples)
@@ -105,8 +106,9 @@ if __name__ == '__main__':
 
             train_rbf(net,training_data, learning_rate, num_iterations)
 
-            # print("Testing Network:")
-            total += test_network(net, testing_data)
+            result = test_network(net, testing_data)
+            total += result
+            print(result)
             # print("\n")
 
         print("Average: %f" % (total / num_trials))
