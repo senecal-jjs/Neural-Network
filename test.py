@@ -3,7 +3,11 @@
 import numpy as np
 import random
 import MLP
+import RBF
 import math
+import trainingArray
+import Kmeans
+import numpy as np
 from trainingArray import trial_run
 
 def gen_test_set(size, func):
@@ -14,41 +18,88 @@ def gen_test_set(size, func):
     return data;
 
 
+def get_rbf_layers(inputs, gaussians, outputs):
+    ''' Return the array of number of nodes per layer in the RBF network '''
+    net_layers = [inputs, gaussians,
+                  outputs]
+    return net_layers
+
+def train_rbf(rbf_net, training_data, learning_rate, num_iterations):
+    for i in range(num_iterations):
+        if i % 100 == 0:
+            print("Beginning iteration %d of %d..." % (i, num_iterations))
+        np.random.shuffle(training_data)
+        rbf_net.train_incremental(training_data, learning_rate)
+
+def test_network(net, testing_data):
+    ''' Given the trained net, calculate the output of the net
+    Print the root mean square error to the console by default
+    If write output is set, create a CSV with the test inputs,
+    outputs, and other statistics '''
+
+    input_vals = []
+    output_vals = []
+    true_vals = [test.solution for test in testing_data]
+
+    for testInput in testing_data:
+        data_in = testInput.inputs
+        out_val = net.calculate_outputs(data_in)[0]
+        output_vals.append(out_val)
+        input_vals.append(data_in)
+
+    error = rmse(output_vals, true_vals)
+    print ("RMSE: %f\n" % error)
+
+    write = False
+    if write:
+        pass
+        # self.create_csv(input_vals, output_vals, true_vals);
+    return error
+
+def rmse(predicted, true):
+    ''' Given arrays of predicted and true values, calculate
+    root mean square error '''
+
+    return np.sqrt(((np.array(predicted) - np.array(true)) ** 2).mean())
+
+
 if __name__ == '__main__':
     # number of training sets:
-    x = 3000
-    func = lambda inp: inp**2
+    num_inputs = 1
+    num_outputs = 1
+    num_examples = 3000
+    learning_rate = 0.005
+    num_iterations = 10
+    gauss = 10
+    num_trials = 20
 
-    test_size = 1000
-    train_size = 500
+    total = 0
 
-    net = MLP.network([1, 35, 35, 1], "sigmoid")
+    for i in range(num_trials):
+        print("Building training array")
+        dataHandler = trainingArray.trainingArray(num_inputs, num_examples)
+        data = dataHandler.createTrainingData()
 
+        split = int((len(data) / 3) * 2)
+        training_data = data[:split]
+        testing_data = data[split:]
 
-    test_set = gen_test_set(test_size,func)
-    training_set = gen_test_set(train_size,func)
+        training_inputs = [example.inputs for example in training_data]
+        print("Computing kmeans")
+        centroids = Kmeans.kMeans(gauss, training_inputs, num_inputs).calculateKMeans()
 
-    def stochastic_auto(batch_size, num_batches):
-        def run(training_data, learning_rate):
-            net.train_stochastic(training_data, batch_size, num_batches, learning_rate)
-        return run
+        net_layers = get_rbf_layers(num_inputs, gauss, num_outputs)
 
-    print("Training Network:")
-    result = net.train_until_convergence(training_set, test_set, stochastic_auto(100,4), .3, .001, 5000)
-    if result:
-        print("Convergence during training occured")
-    else:
-        print("No convergence while training")
+        print("Centroids computed!\n")
+        # net = MLP.network([1, 35, 35, 1], "sigmoid")
+        net = RBF.network(net_layers, "gaussian", centroids)
 
-    print("Testing Network:")
-    # test how "good" it is:
-    sum_err = 0
+        print("Training Network:")
 
-    for i in test_set:
-        output = net.calculate_outputs(i.inputs)
-        # does root-mean squared error:
-        err = output - i.solution
-        # print("Error was: %f" % err)
-        sum_err = sum_err + err**2
+        train_rbf(net,training_data, learning_rate, num_iterations)
 
-    print("RMSE: %f" % math.sqrt(sum_err/test_size))
+        print("Testing Network:")
+        total += test_network(net, testing_data)
+        print("\n")
+
+    print("Average: %f" % (total / num_trials))
