@@ -174,6 +174,7 @@ class buildGUI(Frame):
 
         exit()
 
+    # Method to start operation of an MLP network
     def run_mlp(self):
 
         # Set the number of nodes per layer as input for the MLP net
@@ -182,7 +183,7 @@ class buildGUI(Frame):
         net_rmse = self.train_mlp(net)
         self.test_network(net_rmse[0], rmse_vals=net_rmse[1])
 
-
+    # Method to start operation of an RBF network
     def run_rbf(self):
         print("Computing centroids...")
         net_layers = self.get_rbf_layers()
@@ -193,8 +194,9 @@ class buildGUI(Frame):
         net_rmse = self.train_RBF(net)
         self.test_network(net_rmse[0], rmse_vals=net_rmse[1])
 
+    # Method to retrieve the number of nodes per layer for an MLP network
     def get_mlp_layers(self):
-        ''' Return the array of number of nodes per layer for the MLP network'''
+        # Return the array of number of nodes per layer for the MLP network
         net_layers = [int(self.inputs.get())]
 
         for lay in self.nodes.get().split(','):
@@ -204,6 +206,7 @@ class buildGUI(Frame):
         
         return net_layers
 
+    # Method to retrieve the nodes per layer for an RBF network
     def get_rbf_layers(self):
         ''' Return the array of number of nodes per layer in the RBF network '''
         net_layers = [int(self.inputs.get()), int(self.gaussians.get()), 
@@ -211,6 +214,7 @@ class buildGUI(Frame):
 
         return net_layers
 
+    # Method to calculated the centroids required by the RBF network
     def get_rbf_centroids(self):
         ''' Given the method for selecting the k centroids, return an array
             of k centroids '''
@@ -236,6 +240,7 @@ class buildGUI(Frame):
 
         return centroids
 
+    # Method to perform the training process of the MLP network
     def train_mlp(self, mlp_net):
         ''' Given the network, iterations, and update method, train the net '''
         net = mlp_net
@@ -288,6 +293,7 @@ class buildGUI(Frame):
 
         return net, RMSE
 
+    # Method to perform the training process of the RBF network
     def train_RBF(self, rbf_net):
         RMSE = []
         error = 999
@@ -326,6 +332,7 @@ class buildGUI(Frame):
 
         return rbf_net, RMSE
 
+    # Method to calculated the RMSE (error) on a validation data set during training
     def validate_network(self, net):
         output_vals = []
         true_vals = [test.solution for test in self.validation_data]
@@ -338,6 +345,7 @@ class buildGUI(Frame):
         error = self.rmse(output_vals, true_vals)
         return error
 
+    # Method to test the performance of the network on a test data set, after training has completed.
     def test_network(self, net, rmse_vals=None):
         ''' Given the trained net, calculate the output of the net
             Print the root mean square error to the console by default
@@ -364,12 +372,14 @@ class buildGUI(Frame):
         if write:
             self.create_csv(input_vals, output_vals, true_vals, rmse_vals);
 
+    # Method to calculated the RMSE (error) given an array of network outputs, and an array of the true values
     def rmse(self, predicted, true):
         ''' Given arrays of predicted and true values, calculate
             root mean square error '''
 
         return np.sqrt(((np.array(predicted) - np.array(true)) ** 2).mean())
 
+    # Method to write test results to a .csv file
     def create_csv(self, inputs, outputs, true_values, rmse_vals=None):
         ''' Create a csv file with the test inputs, calculated outputs,
             true values and relevant statistics. '''
@@ -411,6 +421,7 @@ class buildGUI(Frame):
         # end open
         print("Done writing file")
 
+    # Method to print the parameters of a given test to the console
     def print_starting_info(self):
         if self.nnType == "Perceptron":
             print("Starting MLP\n------------------------------------------------")
