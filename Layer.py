@@ -1,6 +1,10 @@
 import numpy as np
 import Neuron
 
+'''The layer class holds the parameters that are required by a layer within the network, including: the weight matrices,
+   the centroids for an RBF network, as well as the error values and derivatives used in backpropagation. Additionally
+   the layer class is used to propagate inputs through the network'''
+
 
 class layer:
     def __init__(self, weight_size, activation_function, input_layer = False, output_layer = False, in_sigma=None, k_means=None):

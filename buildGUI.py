@@ -9,6 +9,10 @@ import Kmeans
 import RBF
 from collections import namedtuple
 
+'''The buildGUI class holds all of the functionality for displaying the GUI that presents the network and parameter
+   choices to the user. This class also holds the network operation methods required to pass data from the GUI to the
+   network, initialize the network, and begin training and testing of the network'''
+
 trial_run = namedtuple('trial_run', ['inputs', 'solution'])
 
 
