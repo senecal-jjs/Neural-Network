@@ -7,10 +7,11 @@ import RBF
 import math
 import trainingArray
 import Kmeans
+import sys
 import numpy as np
 from trainingArray import trial_run
 
-def gen_test_set(size, func):
+def gen_test_setGGGGGG(size, func):
     data = []
     for i in range(size):
         val = np.random.randint(low=0, high=10)
@@ -27,13 +28,14 @@ def get_rbf_layers(inputs, gaussians, outputs):
 def train_rbf(rbf_net, training_data, learning_rate, num_iterations):
     for i in range(num_iterations):
         if i % 100 == 0:
-            print("Beginning iteration %d of %d..." % (i, num_iterations))
+            pass
+            # print("Beginning iteration %d of %d..." % (i, num_iterations))
         np.random.shuffle(training_data)
         rbf_net.train_incremental(training_data, learning_rate)
 
 def test_network(net, testing_data):
     ''' Given the trained net, calculate the output of the net
-    Print the root mean square error to the console by default
+    # Print the root mean square error to the console by default
     If write output is set, create a CSV with the test inputs,
     outputs, and other statistics '''
 
@@ -48,7 +50,7 @@ def test_network(net, testing_data):
         input_vals.append(data_in)
 
     error = rmse(output_vals, true_vals)
-    print ("RMSE: %f\n" % error)
+    # print ("RMSE: %f\n" % error)
 
     write = False
     if write:
@@ -65,41 +67,46 @@ def rmse(predicted, true):
 
 if __name__ == '__main__':
     # number of training sets:
-    num_inputs = 1
+    num_inputs = int(sys.argv[2])
     num_outputs = 1
-    num_examples = 3000
+    num_examples = int(sys.argv[1])
     learning_rate = 0.005
     num_iterations = 10
-    gauss = 10
+    # gauss = int(sys.argv[2])
     num_trials = 20
 
     total = 0
 
-    for i in range(num_trials):
-        print("Building training array")
-        dataHandler = trainingArray.trainingArray(num_inputs, num_examples)
-        data = dataHandler.createTrainingData()
+    k_vals = [10, 50, 100, 500, 1000]
 
-        split = int((len(data) / 3) * 2)
-        training_data = data[:split]
-        testing_data = data[split:]
+    for k in k_vals:
+        print("For k-val: %d" % k)
+        gauss = k
+        for i in range(num_trials):
+            # print("Building training array")
+            dataHandler = trainingArray.trainingArray(num_inputs, num_examples)
+            data = dataHandler.createTrainingData()
 
-        training_inputs = [example.inputs for example in training_data]
-        print("Computing kmeans")
-        centroids = Kmeans.kMeans(gauss, training_inputs, num_inputs).calculateKMeans()
+            split = int((len(data) / 3) * 2)
+            training_data = data[:split]
+            testing_data = data[split:]
 
-        net_layers = get_rbf_layers(num_inputs, gauss, num_outputs)
+            training_inputs = [example.inputs for example in training_data]
+            # print("Computing kmeans")
+            centroids = Kmeans.kMeans(gauss, training_inputs, num_inputs).calculateKMeans()
 
-        print("Centroids computed!\n")
-        # net = MLP.network([1, 35, 35, 1], "sigmoid")
-        net = RBF.network(net_layers, "gaussian", centroids)
+            net_layers = get_rbf_layers(num_inputs, gauss, num_outputs)
 
-        print("Training Network:")
+            # print("Centroids computed!\n")
+            # net = MLP.network([1, 35, 35, 1], "sigmoid")
+            net = RBF.network(net_layers, "gaussian", centroids)
 
-        train_rbf(net,training_data, learning_rate, num_iterations)
+            # print("Training Network:")
 
-        print("Testing Network:")
-        total += test_network(net, testing_data)
-        print("\n")
+            train_rbf(net,training_data, learning_rate, num_iterations)
 
-    print("Average: %f" % (total / num_trials))
+            # print("Testing Network:")
+            total += test_network(net, testing_data)
+            # print("\n")
+
+        print("Average: %f" % (total / num_trials))
