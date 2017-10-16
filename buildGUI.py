@@ -45,19 +45,6 @@ class buildGUI(Frame):
         self.examples = Entry(self)
         self.examples.grid(row=2, column=1)
 
-        #Entry for number of tests to run
-        #testsLabel = Label(self, text="Number of tests")
-        #testsLabel.grid(row=3, column=0)
-
-        #self.tests = Entry(self)
-        #self.tests.grid(row=3, column=1)
-
-        #Check box for whether or not to create a csv output file
-        #wo = IntVar()
-        #self.w = Checkbutton(self, text="Write output", variable=wo)
-        #self.w.grid(row=10, column=0)
-        #self.write_output = wo.get()
-
         # Check box if the user wants to incorporate momentum in the weight updates
         self.use_momentum = ttk.Checkbutton(self, text="Momentum")
         self.use_momentum.grid(row=10, column=0)
@@ -138,11 +125,6 @@ class buildGUI(Frame):
             self.gaussians = Entry(self)
             self.gaussians.grid(row=5, column=1)
 
-            #Check box for whether or not to use K means clustering
-            #self.use_k_means = IntVar()
-            #self.c = Checkbutton(self, text="K-Means", variable=self.use_k_means, onvalue="k", offvalue="noK")
-            #self.c.grid(row=6, column=0)
-
             self.use_k_means = ttk.Checkbutton(self, text="K-Means")
             self.use_k_means.grid(row = 6, column=0)
 
@@ -159,16 +141,11 @@ class buildGUI(Frame):
         approximateButton.grid(row=13, column=1)
 
     def approx_function(self):
-
-        #for i in range(int(self.tests.get())):
-            #print ("Starting test " + str(i + 1) + " of " + str(self.tests.get()) + "...")
         dataHandler = trainingArray.trainingArray(int(self.inputs.get()), int(self.examples.get()))
         self.data = np.array(dataHandler.createTrainingData())
 
         data_folds = np.split(self.data, 10)
 
-        #print ("data folds:")
-        #print (data_folds)
         self.print_starting_info()
 
         for i in range(10):
@@ -182,17 +159,6 @@ class buildGUI(Frame):
             for j in range(10):
                 if j != i and j != i-1:
                     [self.training_data.append(trial_run(item[0], item[1])) for item in data_folds[j]]
-
-            #print ("train: ")
-            #print (self.training_data)
-            #print ("validate:")
-            #print (self.validation_data)
-            #print ("test")
-            #print (self.testing_data)
-
-            #split = int((len(self.data) / 3) * 2)
-            #self.training_data = self.data[:split]
-            #self.testing_data = self.data[split:]
 
             if self.nnType == "Perceptron":
                 self.run_mlp()
@@ -293,7 +259,6 @@ class buildGUI(Frame):
         if int(self.inputs.get()) == 6:
             cut_off = 25
 
-
         for i in range(int(self.iterations.get())):
 
             if i % 100 == 0:
@@ -316,7 +281,6 @@ class buildGUI(Frame):
             
             if error < cut_off:
                 break
-
 
         return net, RMSE
 
