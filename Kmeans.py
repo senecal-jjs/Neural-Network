@@ -1,6 +1,9 @@
 import random
 import numpy as np
 
+'''The kMeans class is used to calculate the centroids of clusters within a dataset'''
+
+
 class kMeans:
 	def __init__(self, k, inputs, n):
 		self.k = k

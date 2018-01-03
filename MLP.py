@@ -84,7 +84,7 @@ class network:
         stop_iter iterations.
         """
         iter_num = 0
-        # some value greater than the threshold (I hope:):
+        # some value greater than the threshold
         error = 10000
         while((iter_num == 0 or error > threshold) and iter_num <= stop_iter):
             train_func(training_data, learning_rate)
@@ -117,7 +117,6 @@ class network:
             for i in range(len(change)):
                 running_total[i] = running_total[i] + change[i]
 
-        # assert len(change) == self.num_layers-1
         # divide by the batch size:
         av_change = list(map(lambda x: np.divide(x, len(training_data)), running_total))
         # update the weights:

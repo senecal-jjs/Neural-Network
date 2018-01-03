@@ -64,7 +64,6 @@ class network:
             self.backpropagate(output, data_point.solution)
             self.update_weights(learning_rate, use_momentum=use_momentum, beta=beta)
 
-
     # This method calculates the parameter 'sigma' which is required by the gaussian activation functions
     @staticmethod
     def calculate_sigma(k_means_vectors):
