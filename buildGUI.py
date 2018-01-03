@@ -255,7 +255,7 @@ class buildGUI(Frame):
             if state == "selected":
                 momentum = True
                 beta = float(self.beta.get())
-                print("Momentum in use!")
+                print("Momentum in use!\n")
 
         if int(self.inputs.get()) == 2:
             cut_off = .25
@@ -305,7 +305,7 @@ class buildGUI(Frame):
             if state == "selected":
                 momentum = True
                 beta = float(self.beta.get())
-                print("Momentum in use!")
+                print("Momentum in use!\n")
 
         if int(self.inputs.get()) == 2:
             cut_off = .25
