@@ -1,6 +1,8 @@
 import random
 from collections import namedtuple
 
+'''The trainingArray class holds the functionality to create all of the training and testing data that is required'''
+
 trial_run = namedtuple('trial_run', ['inputs', 'solution'])
 
 
