@@ -51,4 +51,8 @@ class neuron:
                 for i in range(num_nodes):
                     output[i] = np.exp(-((np.linalg.norm(np.subtract(i_inputs, in_Kvectors[i])) ** 2) / (2 * (self.sigma ** 2))))
 
+        elif self.function_type == "softmax":
+            sum = np.sum(np.exp(i_inputs))
+            output = np.exp(i_inputs) / sum
+
         return output
